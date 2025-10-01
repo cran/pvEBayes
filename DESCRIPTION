@@ -1,6 +1,6 @@
 Package: pvEBayes
 Title: Empirical Bayes Methods for Pharmacovigilance
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person(
     "Yihao", "Tan", 
@@ -38,7 +38,7 @@ Config/testthat/edition: 3
 URL: https://github.com/YihaoTancn/pvEBayes
 BugReports: https://github.com/YihaoTancn/pvEBayes/issues
 NeedsCompilation: yes
-Packaged: 2025-07-03 14:41:00 UTC; yihao
+Packaged: 2025-09-26 19:02:24 UTC; yihao
 Author: Yihao Tan [aut, cre] (ORCID: <https://orcid.org/0009-0002-9196-8166>),
   Marianthi Markatou [aut] (ORCID:
     <https://orcid.org/0000-0002-1453-8229>),
@@ -47,4 +47,4 @@ Author: Yihao Tan [aut, cre] (ORCID: <https://orcid.org/0009-0002-9196-8166>),
   Raktim Mukhopadhyay [aut] (ORCID:
     <https://orcid.org/0009-0007-8972-6682>)
 Repository: CRAN
-Date/Publication: 2025-07-10 15:20:06 UTC
+Date/Publication: 2025-10-01 07:50:07 UTC

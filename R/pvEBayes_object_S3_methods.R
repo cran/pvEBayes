@@ -231,7 +231,6 @@ eyeplot_pvEBayes <- function(x,
       . > 1.001
     } %>%
     apply(c(2, 3), mean)
-
   RMSE1 <- x$posterior_draws %>%
     # posterior::draws_of() %>%
     {
@@ -240,11 +239,11 @@ eyeplot_pvEBayes <- function(x,
     apply(c(2, 3), mean)
   filter_indi <- .check_AEs(post_prob_matrix, x$contin_table, N_threshold)
   RMSE1[x$contin_table <= N_threshold] <- 0
-  orders <- RMSE1[filter_indi, ] %>%
+  orders <- RMSE1[filter_indi, , drop = FALSE] %>%
     # rowSums() %>%
     apply(1, max) %>%
     {
-      -.
+      . * (-1)
     } %>%
     order()
   if (length(orders) < top_AEs) {
@@ -267,7 +266,6 @@ eyeplot_pvEBayes <- function(x,
   if (!is.null(drugs)) {
     drug_names <- drugs
   }
-
   dat_plot <- x$posterior_draws %>%
     # posterior::draws_of() %>%
     data.table::as.data.table() %>%
@@ -299,7 +297,7 @@ eyeplot_pvEBayes <- function(x,
   dat_plot$AE <- (dat_plot$AE %>% .capitalize_words()) %>%
     factor(levels = AE_names %>% .capitalize_words() %>% rev())
   dat_plot$drug <- (dat_plot$drug %>% .capitalize_words()) %>%
-    factor(levels = ordered_drug_names %>% rev() %>%
+    factor(levels = ordered_drug_names %>% .capitalize_words() %>% rev() %>%
       {
         c(setdiff(., "Other_drugs"), "Other_drugs")
       })
@@ -497,11 +495,11 @@ heatmap_pvEBayes <- function(x,
 
   filter_indi <- .check_AEs(post_prob_matrix, x$contin_table, 4)
   RMSE1[x$contin_table <= 4] <- 0
-  orders <- RMSE1[filter_indi, ] %>%
+  orders <- RMSE1[filter_indi, , drop = FALSE] %>%
     # rowSums() %>%
     apply(1, max) %>%
     {
-      -.
+      . * (-1)
     } %>%
     order()
   if (length(orders) < top_AEs) {
@@ -547,7 +545,7 @@ heatmap_pvEBayes <- function(x,
   dat_plot$AE <- (dat_plot$AE %>% .capitalize_words()) %>%
     factor(levels = AE_names %>% .capitalize_words() %>% rev())
   dat_plot$drug <- (dat_plot$drug %>% .capitalize_words()) %>%
-    factor(levels = ordered_drug_names %>% rev())
+    factor(levels = ordered_drug_names %>% .capitalize_words() %>% rev())
 
   data.table::setDT(dat_plot)
   # Adding new columns using :=

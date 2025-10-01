@@ -1,15 +1,15 @@
 test_that("pvEBayes object associated functions", {
-  valid_matrix <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8), nrow = 2)
+  valid_matrix <- matrix(c(70, 40, 44, 50, 52, 60, 70, 80), nrow = 2)
 
   obj <- pvEBayes(
     contin_table = valid_matrix,
-    model = "general-gamma", alpha = 0.5
+    model = "general-gamma", alpha = 0.1
   )
   plot1 <- eyeplot_pvEBayes(obj, text_shift = 0.1)
-  expect_equal(ggplot2::is_ggplot(plot1), TRUE)
+  expect_equal(inherits(plot1, "ggplot"), TRUE)
 
   plot2 <- heatmap_pvEBayes(obj)
-  expect_equal(ggplot2::is_ggplot(plot2), TRUE)
+  expect_equal(inherits(plot2, "ggplot"), TRUE)
   print_tmp <- print(obj)
   expect_equal(is.pvEBayes(print_tmp), TRUE)
 
@@ -21,6 +21,6 @@ test_that("pvEBayes object associated functions", {
 
   plot3 <- plot(obj, type = "eyeplot")
   plot4 <- plot(obj, type = "heatmap")
-  expect_equal(ggplot2::is_ggplot(plot3), TRUE)
-  expect_equal(ggplot2::is_ggplot(plot4), TRUE)
+  expect_equal(inherits(plot3, "ggplot"), TRUE)
+  expect_equal(inherits(plot4, "ggplot"), TRUE)
 })

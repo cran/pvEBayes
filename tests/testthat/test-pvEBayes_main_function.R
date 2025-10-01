@@ -1,7 +1,7 @@
 
 
 test_that("pvEBayes", {
-  valid_matrix <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8), nrow = 2)
+  valid_matrix <- matrix(c(70, 40, 44, 50, 52, 60, 70, 80), nrow = 2)
   rownames(valid_matrix) <- c("AE_1", "AE_2")
   colnames(valid_matrix) <- c("drug_1", "drug_2", "drug_3", "drug_4")
   expect_equal(.is_valid_contin_table(valid_matrix), TRUE)

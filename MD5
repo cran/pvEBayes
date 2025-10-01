@@ -1,12 +1,13 @@
-d9100c14e8a4220a37dc3d1446a356d0 *DESCRIPTION
+0753b454a58375baaf060d4a2347fc85 *DESCRIPTION
 0b48a07a8b5c985bcbbc6a47a6546323 *NAMESPACE
 c341e3c86307a91ff666b165c65a0416 *R/RcppExports.R
 468b240b34fe6ceda7c848fe1814952f *R/data.R
 746b0aa1212f264eb28e9f037717e265 *R/global_var.R
-296f382f6073f58cd3b268d1d9284bd1 *R/pvEBayes_main_function.R
-ce7b8dc221a1cb98e8937c79d83b5dab *R/pvEBayes_object_S3_methods.R
+a0dfdb8ead2f798439f24ad9ef438fbd *R/pvEBayes_main_function.R
+f17e96570dda7b24e36182dc426d38b8 *R/pvEBayes_object_S3_methods.R
 122cfe596a9ab79d0cc921f48b864680 *R/r_contin_table_gen.R
 b56ff2b193ecba52f9ec7f3b10cca008 *R/utils-pipe.R
+79a02fb468dc874e7630d784bb46f5f9 *README.md
 9f89cf6264b946a7f435d2fedaef9839 *data/gbca2025.rda
 f4ee9bb2772c7cd5b91c418d138fdae9 *data/gbca2025_69.rda
 ab12702951b174e53e75ec0e1764b565 *data/statin2025.rda
@@ -40,6 +41,6 @@ d954d41953fe4aab834351cd89185080 *man/tuning_efron.Rd
 b4ec0583d0c90b0e9138675a324ef9e7 *src/RcppExports.cpp
 c32342df6f0e67d4c2ce9dc4de70cc46 *src/post_draw.cpp
 43fc963d206f8394bf37dfac20c8250d *tests/testthat.R
-f3064979e3a51031258b33916d6d119c *tests/testthat/test-pvEBayes_main_function.R
-423fc0326bb03f59570529851df79234 *tests/testthat/test-pvEBayes_object_S3_methods.R
+c02cb7138c02c06522d52692eb930886 *tests/testthat/test-pvEBayes_main_function.R
+dd9816f041c983f137b87b786119c4e8 *tests/testthat/test-pvEBayes_object_S3_methods.R
 2b30c97518b3e3ffe89b1c5fe95d02ed *tests/testthat/test-r_contin_table_gen.R

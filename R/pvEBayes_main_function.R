@@ -105,12 +105,12 @@ estimate_null_expected_count <- function(contin_table) {
   AE_names <- vapply(1:I, function(e) {
     glue::glue("AE", e)
   }, FUN.VALUE = character(1))
-  AE_names[I] <- "other AEs"
+  AE_names[I] <- "Other_AEs"
 
   drug_names <- vapply(1:J, function(e) {
     glue::glue("drug", e)
   }, FUN.VALUE = character(1))
-  drug_names[J] <- "other drugs"
+  drug_names[J] <- "Other_drugs"
 
   contin_table %>%
     magrittr::set_rownames(AE_names) %>%
