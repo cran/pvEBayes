@@ -22,19 +22,20 @@ eyeplot_pvEBayes(
 \item{x}{a \code{pvEBayes} object, which is the output of the function
 \link{pvEBayes} or \link{pvEBayes_tune}.}
 
-\item{num_top_AEs}{number of most significant AEs appearing in the plot. Default to
-10.}
+\item{num_top_AEs}{a number of most significant AEs appearing in the plot.
+Default to 10.}
 
-\item{num_top_drugs}{number of most significant drugs appearing in the plot. Default
-to 7.}
+\item{num_top_drugs}{a number of most significant drugs appearing in the
+plot. Default to 7.}
 
-\item{specified_AEs}{a vector of AE names that are specified to appear in the plot. If
-a vector of AEs is given, argument num_top_AEs will be ignored.}
+\item{specified_AEs}{a vector of AE names that are specified to appear in the
+plot. If a vector of AEs is given, argument num_top_AEs will be ignored.}
 
-\item{specified_drugs}{a vector of drug names that are specified to appear in the plot.
-If a vector of drugs is given, argument num_top_drugs will be ignored.}
+\item{specified_drugs}{a vector of drug names that are specified to appear in
+the plot. If a vector of drugs is given, argument num_top_drugs will be
+ignored.}
 
-\item{N_threshold}{integer greater than 0. Any AE-drug combination with
+\item{N_threshold}{a integer greater than 0. Any AE-drug combination with
 observation smaller than N_threshold will be filtered out.}
 
 \item{text_shift}{numeric. Controls the relative position of text labels,

@@ -14,12 +14,12 @@ generate_contin_table(
 )
 }
 \arguments{
-\item{n_table}{number of random matrices to generate.}
+\item{n_table}{a number of random matrices to generate.}
 
 \item{ref_table}{a reference table used as the basis for generating random
 tables.}
 
-\item{signal_mat}{numeric matrix of the same dimension as
+\item{signal_mat}{a numeric matrix of the same dimension as
 the reference table (ref_table). The entry at position (i, j)
 in signal_mat represents the signal strength between
 the i-th adverse event and the j-th drug. By default,
@@ -64,7 +64,9 @@ simu_table <- generate_contin_table(ref_table,
 
 }
 \references{
-Tan Y, Markatou M and Chakraborty S. Flexible Empirical Bayesian Approaches to
-Pharmacovigilance for Simultaneous Signal Detection and Signal Strength Estimation
-in Spontaneous Reporting Systems Data. \emph{arXiv preprint.} 2025; arXiv:2502.09816.
+Tan Y, Markatou M and Chakraborty S. Flexible Empirical Bayesian Approaches
+to Pharmacovigilance for Simultaneous Signal Detection and Signal Strength
+Estimation in Spontaneous Reporting Systems Data.
+\emph{Statistics in Medicine.} 2025; 44: 18-19,
+https://doi.org/10.1002/sim.70195.
 }

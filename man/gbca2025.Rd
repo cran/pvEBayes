@@ -25,7 +25,7 @@ the rows. Each cell in the contingency table represents the total
 report counts associated with that (AE, drug) pair and detected
 in the FDA FAERS database during 2021Q1 - 2024Q4.
 
-The dataset catalogs 7 Gadolinium-Based Contrast Agents (GBCAs) (across columns):
+The dataset catalogs 7 Gadolinium-Based Contrast Agents (GBCAs):
 
 Gadobenate, Gadobutrol, Gadodiamide, Gadopentetate, Gadoterate, Gadoteridol,
 Gadoxetate
@@ -33,7 +33,8 @@ Gadoxetate
 The 1328 adverse events presented across the rows are AEs that contain at
 least one report for the 7 GBCA drugs during 2021Q1 - 2024Q4.
 
-This dataset is an updated version of gbca from the pvLRT package which collects
-the same scope of AEs for 7 gbca drugs for quarters 2014Q3 - 2020Q4.
+This dataset is an updated version of gbca from the pvLRT package
+which collects the same scope of AEs for 7 gbca drugs for quarters
+2014Q3 - 2020Q4.
 }
 \keyword{datasets}

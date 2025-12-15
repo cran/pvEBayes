@@ -72,7 +72,6 @@ NBmixResult NBmix_s1_EM_g(const Eigen::VectorXd& N,
                           int maxi,
                           double eps,
                           bool dirichlet) {
-
   int k = grid.size();
   int len_N = N.size();
   int iter = 0;
@@ -89,7 +88,6 @@ NBmixResult NBmix_s1_EM_g(const Eigen::VectorXd& N,
   Eigen::VectorXd P = Eigen::VectorXd::Ones(k) / k;
 
   double loglik = -std::numeric_limits<double>::infinity();
-  double loglik_new;
 
 
   Eigen::ArrayXXd TN1 = tcrossprod(N, Eigen::VectorXd::Ones(k)).array();
@@ -164,7 +162,6 @@ NBmixResult NBmix_s1_EM_g(const Eigen::VectorXd& N,
       TN1 = array_colIndexing(TN1, filtered_seq);
       TR1 = array_colIndexing(TR1, filtered_seq);
       T1h = array_colIndexing(T1h, filtered_seq);
-
     }
 
     //updating r_k
@@ -209,7 +206,7 @@ NBmixResult NBmix_s1_EM_g(const Eigen::VectorXd& N,
     //compute log-likelihood
     tmp = mx_dnbinom_log(TN1, TR1, TEh, P, len_N);
     tmp_max = tmp.rowwise().maxCoeff();
-    loglik_new = ((tmp.colwise() - tmp_max).exp().rowwise().sum().log() + tmp_max).sum();
+    double loglik_new = ((tmp.colwise() - tmp_max).exp().rowwise().sum().log() + tmp_max).sum();
 
 
     if ((std::abs(loglik - loglik_new) <= eps) && (iter > 100)) {
@@ -220,8 +217,6 @@ NBmixResult NBmix_s1_EM_g(const Eigen::VectorXd& N,
     if(iter>= maxi){
       stop = true;
     }
-
-
   }
 
   NBmixResult result;
@@ -244,7 +239,6 @@ Rcpp::List NBmix_s1_EM_g_Rcpp(const Eigen::VectorXd& N,
                               int maxi,
                               double eps,
                               bool dirichlet) {
-
   // Call the core function using Rcpp::as to convert R types to std::vector<int>
   NBmixResult result = NBmix_s1_EM_g(N, E, h, grid, alpha, maxi, eps, dirichlet);
 

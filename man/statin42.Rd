@@ -27,7 +27,8 @@ in the FDA FAERS database during 2014Q3 - 2020Q4.
 
 The dataset catalogs 6 statin drugs (across columns):
 
-Atorvastatin, Fluvastatin, Lovastatin, Pravastatin, Rosuvastatin, Simvastatin.
+Atorvastatin, Fluvastatin, Lovastatin, Pravastatin, Rosuvastatin and
+Simvastatin.
 
 This dataset is derived from the \code{statin46} dataset in the \pkg{pvLRT}
 package, with four AEs removed.

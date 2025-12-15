@@ -24,9 +24,10 @@ valid_matrix <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8), nrow = 2)
 rownames(valid_matrix) <- c("AE_1", "AE_2")
 colnames(valid_matrix) <- c("drug_1", "drug_2", "drug_3", "drug_4")
 
-tuned_object = pvEBayes_tune(valid_matrix,
-                            model = "general-gamma",
-                            return_all_fit = TRUE)
+tuned_object <- pvEBayes_tune(valid_matrix,
+  model = "general-gamma",
+  return_all_fit = TRUE
+)
 extract_all_fitted_models(tuned_object)
 
 }

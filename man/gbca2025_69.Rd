@@ -32,7 +32,7 @@ Gadobenate, Gadobutrol, Gadodiamide, Gadopentetate, Gadoterate, Gadoteridol,
 Gadoxetate.
 
 The 69 adverse events presented across the rows are selected from 1328 AEs of
-gbca2025 which are related to the brain or neural system. Other AEs are collapsed
-to one reference row: "Other AEs".
+gbca2025 which are related to the brain or neural system. Other AEs are
+collapsed to one reference row: "Other AEs".
 }
 \keyword{datasets}

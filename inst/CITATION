@@ -1,0 +1,13 @@
+bibentry(
+  bibtype = "Manual",
+  title   = "pvEBayes: Empirical Bayes Models for Pharmacovigilance",
+  author  = c(
+    person("Yihao", "Tan"),
+    person("Saptarshi", "Chakraborty"),
+    person("Marianthi", "Markatou"),
+    person("Raktim","Mukhopadhyay")
+  ),
+  year    = 2025,
+  note    = "R package version 0.2.0",
+  url     = "https://CRAN.R-project.org/package=pvEBayes"
+)

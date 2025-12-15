@@ -18,17 +18,18 @@ heatmap_pvEBayes(
 \item{x}{a \code{pvEBayes} object, which is the output of the function
 \link{pvEBayes} or \link{pvEBayes_tune}.}
 
-\item{num_top_AEs}{number of most significant AEs appearing in the plot. Default to
-10.}
+\item{num_top_AEs}{number of most significant AEs appearing in the plot.
+Default to 10.}
 
-\item{num_top_drugs}{number of most significant drugs appearing in the plot. Default
-to 7.}
+\item{num_top_drugs}{number of most significant drugs appearing in the plot.
+Default to 7.}
 
-\item{specified_AEs}{a vector of AE names that are specified to appear in the plot. If
-a vector of AEs is given, argument num_top_AEs will be ignored.}
+\item{specified_AEs}{a vector of AE names that are specified to appear in the
+plot. If a vector of AEs is given, argument num_top_AEs will be ignored.}
 
-\item{specified_drugs}{a vector of drug names that are specified to appear in the plot.
-If a vector of drugs is given, argument num_top_drugs will be ignored.}
+\item{specified_drugs}{a vector of drug names that are specified to appear in
+the plot. If a vector of drugs is given, argument num_top_drugs will be
+ignored.}
 
 \item{cutoff_signal}{numeric. Threshold for signal detection. An AE-drug
 combination is classified as a detected signal if its 5th posterior
@@ -51,7 +52,11 @@ fit <- pvEBayes(
 
 heatmap_pvEBayes(
   x = fit,
-  cutoff = 1.001
+  num_top_AEs = 10,
+  num_top_drugs = 8,
+  specified_AEs = NULL,
+  specified_drugs = NULL,
+  cutoff_signal = 1.001
 )
 
 }

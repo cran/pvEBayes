@@ -1,3 +1,3 @@
 utils::globalVariables(c(
- ".", ".data", ":=", ".SD"
+  ".", ".data", ":=", ".SD"
 ))

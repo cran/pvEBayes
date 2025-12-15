@@ -10,17 +10,23 @@ tuning_general_gamma(
   alpha_vec = NULL,
   return_all_fit = FALSE,
   return_all_AIC = TRUE,
-  return_all_BIC = TRUE
+  return_all_BIC = TRUE,
+  tol_ecm = 1e-04
 )
 }
 \arguments{
-\item{contin_table}{an IxJ contingency table showing pairwise counts of adverse
-events for I AEs (along the rows) and J drugs (along the columns).}
+\item{contin_table}{an IxJ contingency table showing pairwise counts of
+adverse events for I AEs (along the rows) and J drugs (along the columns).}
 
 \item{alpha_vec}{vector of hyperparameter alpha values to be selected. Alpha
-is hyperparameter in general-gamma model which is numeric and between 0 and 1.
-If is NULL, a default set of alpha values (0, 0.1, 0.3, 0.5, 0.7, 0.9) will
-be used.}
+is hyperparameter in general-gamma model which is numeric and between 0
+and 1. If is NULL, a default set of alpha values (0, 0.1, 0.3, 0.5, 0.7, 0.9)
+will be used.}
+
+\item{tol_ecm}{a tolerance parameter used for the ECM stopping rule, defined
+as the absolute change in the joint marginal likelihood between two
+consecutive iterations. It is used when 'GPS', 'K-gamma' or 'general-gamma'
+model is fitted. Default to be 1e-4.}
 }
 \value{
 a list of fitted models with hyperparameter alpha selected by AIC or BIC.
@@ -30,10 +36,10 @@ Select hyperparameter alpha and obtain the optimal general-gamma model based
 on AIC and BIC
 }
 \references{
-Akaike H. A new look at the statistical model identification. \emph{IEEE Transactions on Automatic Control.}
-2003; 19(6):716-23. \cr
+Akaike H. A new look at the statistical model identification.
+\emph{IEEE Transactions on Automatic Control.} 2003; 19(6):716-23. \cr
 
-Schwarz G. Estimating the dimension of a model. \emph{The Annals of Statistics.}
-1978; 1:461-4.
+Schwarz G. Estimating the dimension of a model.
+\emph{The Annals of Statistics.} 1978; 1:461-4.
 }
 \keyword{internal}

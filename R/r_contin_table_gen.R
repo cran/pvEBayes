@@ -1,6 +1,14 @@
-#' @importFrom magrittr %>%
-#' @importFrom data.table .SD
-
+#' Generate random sample from a truncated normal distribution
+#'
+#' @param n number of draws.
+#' @param a lower bound of the truncation.
+#' @param b upper bound of the truncation.
+#' @param mean mean of the normal distribution.
+#' @param sd standard deviation of the normal distribution.
+#'
+#' @returns a vector of draws
+#' @keywords internal
+#' @noRd
 rtruncnorm <- function(n, a = -0.4, b = 0, mean = 0, sd = 0.05) {
   samples <- list()
   count <- 0 # Track the number of accepted samples
@@ -17,12 +25,36 @@ rtruncnorm <- function(n, a = -0.4, b = 0, mean = 0, sd = 0.05) {
     i <- i + 1
   }
   res <- unlist(samples)[1:n]
-  return(res)
+  res
 }
 
 
 
 
+#' Generate random SRS tables
+#'
+#' @param ref_table a reference table used as the basis for generating random
+#' tables.
+#' @param signal_mat numeric matrix of the same dimension as
+#' the reference table (ref_table). The entry at position (i, j)
+#' in signal_mat represents the signal strength between
+#' the i-th adverse event and the j-th drug. By default,
+#' each pair is assigned a value of 1, indicating no signal for that pair.
+#' @param n_simu number of random matrices to generate.
+#' @param Variation logical. Include random noises to sig_mat while
+#' generating random tables. Default to FALSE.
+#' If set to TRUE, n_table of sig_mat incorporating the added noise
+#' will also be returned.
+#' @param Z logical matrix of the same size as ref_table indicating
+#' the positions of structural zero.
+#'
+#' @returns
+#'
+#' A list of length \code{n_table}, with each entry being a
+#' \code{nrow(ref_table)} by \code{ncol(ref_table)} matrix.
+#'
+#' @keywords internal
+#' @noRd
 .simu_table_multinom <- function(ref_table,
                                  signal_mat,
                                  n_simu,
@@ -56,8 +88,8 @@ rtruncnorm <- function(n, a = -0.4, b = 0, mean = 0, sd = 0.05) {
       ), I, J)
       tmp_sig[signal_mat == 1] <- signal_mat[signal_mat == 1] +
         err1[signal_mat == 1]
-      tmp_sig[signal_mat > 1] <- signal_mat[signal_mat > 1] + err1[signal_mat >
-        1]
+      tmp_sig[signal_mat > 1] <- signal_mat[signal_mat > 1] +
+        err2[signal_mat > 1]
       tmp_sig[I, ] <- 1
       tmp_sig[, J] <- 1
       tmp_sig * (1 - Z) %>%
@@ -81,12 +113,12 @@ rtruncnorm <- function(n, a = -0.4, b = 0, mean = 0, sd = 0.05) {
       magrittr::set_colnames(colnames(ref_table))
   })
   if (Variation == TRUE) {
-    return(list(
+    list(
       tables = tables,
       var_sig = var_sig
-    ))
+    )
   } else {
-    return(tables)
+    tables
   }
 }
 
@@ -99,10 +131,10 @@ rtruncnorm <- function(n, a = -0.4, b = 0, mean = 0, sd = 0.05) {
 #' reference table, with the option to embed signals and zero-inflation.
 #'
 #'
-#' @param n_table number of random matrices to generate.
+#' @param n_table a number of random matrices to generate.
 #' @param ref_table a reference table used as the basis for generating random
 #' tables.
-#' @param signal_mat numeric matrix of the same dimension as
+#' @param signal_mat a numeric matrix of the same dimension as
 #' the reference table (ref_table). The entry at position (i, j)
 #' in signal_mat represents the signal strength between
 #' the i-th adverse event and the j-th drug. By default,
@@ -117,9 +149,11 @@ rtruncnorm <- function(n, a = -0.4, b = 0, mean = 0, sd = 0.05) {
 #'
 #' @references
 #'
-#' Tan Y, Markatou M and Chakraborty S. Flexible Empirical Bayesian Approaches to
-#' Pharmacovigilance for Simultaneous Signal Detection and Signal Strength Estimation
-#' in Spontaneous Reporting Systems Data. \emph{arXiv preprint.} 2025; arXiv:2502.09816.
+#' Tan Y, Markatou M and Chakraborty S. Flexible Empirical Bayesian Approaches
+#' to Pharmacovigilance for Simultaneous Signal Detection and Signal Strength
+#' Estimation in Spontaneous Reporting Systems Data.
+#' \emph{Statistics in Medicine.} 2025; 44: 18-19,
+#' https://doi.org/10.1002/sim.70195.
 #'
 #' @return
 #'
@@ -149,6 +183,12 @@ rtruncnorm <- function(n, a = -0.4, b = 0, mean = 0, sd = 0.05) {
 #'
 #' @export
 #'
+#' @srrstats {G2.0, G2.1, G2.2} length and value of "n_table" and "Variation"
+#' are properly checked.
+#' @srrstats {G2.0a, G2.1a} The length of "n_table" and "Variation" are explicitly
+#' described in the corresponding documentation.
+#' @srrstats {G2.4, G2.4a, G2.8} explicit conversion is used for integer input.
+#'
 generate_contin_table <- function(n_table = 1,
                                   ref_table,
                                   signal_mat = NULL,
@@ -158,6 +198,17 @@ generate_contin_table <- function(n_table = 1,
     signal_mat <- ref_table
     signal_mat[] <- 1
   }
+
+
+  if (!(is.numeric(n_table) && length(n_table) == 1 &&
+    n_table %% 1 == 0 && n_table > 0)) {
+    stop("'n_table' must be a single integer.")
+  }
+  n_table <- as.integer(n_table)
+  if (!(is.logical(Variation) && length(Variation) == 1)) {
+    stop("'Variation' must be a single logical value (TRUE or FALSE).")
+  }
+
   stopifnot(
     is.numeric(n_table),
     n_table > 0,
@@ -183,5 +234,5 @@ generate_contin_table <- function(n_table = 1,
     Variation,
     zi_indic_mat
   )
-  return(out)
+  out
 }

@@ -12,34 +12,57 @@ pvEBayes(
   p = NULL,
   c0 = NULL,
   maxi = NULL,
-  eps = 1e-04,
-  n_posterior_draws = 1000
+  tol_ecm = 1e-04,
+  rtol_efron = 1e-10,
+  rtol_KM = 1e-06,
+  n_posterior_draws = 1000,
+  E = NULL
 )
 }
 \arguments{
-\item{contin_table}{an IxJ contingency table showing pairwise counts of adverse
-events for I AEs (along the rows) and J drugs (along the columns).}
+\item{contin_table}{an IxJ contingency table showing pairwise counts of
+adverse events for I AEs (along the rows) and J drugs (along the columns).}
 
 \item{model}{the model to fit. Available models are "general-gamma",
-"K-gamma", "GPS", "KM" and "efron". Default to "general-gamma".}
+"K-gamma", "GPS", "KM" and "efron". Default to "general-gamma". Note that the
+input for model is case-sensitive.}
 
-\item{alpha}{numeric between 0 and 1. The hyperparameter of "general-gamma" model.
-It is needed if "general-gamma" model is used.}
+\item{alpha}{numeric between 0 and 1. The hyperparameter of "general-gamma"
+model. It is needed if "general-gamma" model is used. Small 'alpha'
+encourages shrinkage on mixture weights of the estimated prior distribution.
+See Tan et al. (2025) for further details.}
 
-\item{K}{integer greater than or equal to 2. It is needed if "K-gamma" model is used.}
+\item{K}{a integer greater than or equal to 2 indicating the number of
+mixture components in the prior distribution. It is needed if "K-gamma"
+model is used. See Tan et al. (2025) for further details.}
 
-\item{p}{integer greater than or equal to 2. It is needed if "efron" mode is used.}
+\item{p}{a integer greater than or equal to 2. It is needed if "efron" mode
+is used. Larger p leads to smoother estimated prior distribution. See
+Narasimhan and Efron (2020) for detail.}
 
-\item{c0}{numeric and greater than 0. It is needed if "efron" mode is used.}
+\item{c0}{numeric and greater than 0. It is needed if "efron" mode is used.
+Large c0 encourage estimated prior distribution shrink toward discrete
+uniform. See Narasimhan and Efron (2020) for detail.}
 
-\item{maxi}{upper limit of iteration for the ECM algorithm.}
+\item{maxi}{a upper limit of iteration for the ECM algorithm.}
 
-\item{eps}{a tolerance parameter used in the stopping rule of the ECM algorithm.
-If the difference in marginal likelihood between two consecutive iterations is
-less than eps, the ECM algorithm stops. Default to be 1e-4.}
+\item{tol_ecm}{a tolerance parameter used for the ECM stopping rule, defined
+as the absolute change in the joint marginal likelihood between two
+consecutive iterations. It is used when 'GPS', 'K-gamma' or 'general-gamma'
+model is fitted. Default to be 1e-4.}
 
-\item{n_posterior_draws}{number of posterior draws for each AE-drug
+\item{rtol_efron}{a tolerance parameter used when 'efron' model is fitted.
+Default to 1e-10. See 'stats::nlminb' for detail.}
+
+\item{rtol_KM}{a tolerance parameter used when 'KM' model is fitted.
+Default to be 1e-6. See 'CVXR::solve' for detail.}
+
+\item{n_posterior_draws}{a number of posterior draws for each AE-drug
 combination.}
+
+\item{E}{A matrix of expected counts under the null model for the SRS
+frequency table. If \code{NULL} (default), the expected counts are estimated
+from the SRS data using 'estimate_null_expected_count()'.}
 }
 \value{
 The function returns an S3 object of class \code{pvEBayes} containing the
@@ -54,36 +77,37 @@ specified hyperparameter, if is required. Supported models include the
 }
 \details{
 This function implements the ECM algorithm proposed by Tan et al. (2025),
-providing a stable and efficient implementation of Gamma-Poisson Shrinker(GPS),
-K-gamma and "general-gamma" methods for signal estimation and signal detection
-in Spontaneous Reporting System (SRS) data table.
+providing a stable and efficient implementation of Gamma-Poisson
+Shrinker(GPS), K-gamma and "general-gamma" methods for signal estimation and
+signal detection in Spontaneous Reporting System (SRS) data table.
 
 Method "GPS" is proposed by DuMouchel (1999) and it is a parametric empirical
 Bayes model with a two gamma mixture prior distribution.
 
-Methods "K-gamma" and "general-gamma" are non-parametric empirical Bayes models,
-introduced by Tan et al. (2025). The number of mixture components "K" needs
-to be prespecified when fitting a "K-gamma" model. For "general-gamma", the
-mixture weights are regularized by a Dirichlet hyper prior with hyperparameter
-\eqn{0 \leq \alpha < 1} that controls the shrinkage strength. As "alpha" approaches
-0, less non-empty mixture components exist in the fitted model. When \eqn{\alpha = 0},
-the Dirichlet distribution is an improper prior still offering a reasonable
-posterior inference that represents the strongest shrinkage of the "general-gamma"
-model.
+Methods "K-gamma" and "general-gamma" are non-parametric empirical Bayes
+models, introduced by Tan et al. (2025). The number of mixture components "K"
+needs to be prespecified when fitting a "K-gamma" model. For "general-gamma",
+the mixture weights are regularized by a Dirichlet hyper prior with
+hyperparameter \eqn{0 \leq \alpha < 1} that controls the shrinkage strength.
+As "alpha" approaches 0, less non-empty mixture components exist in the
+fitted model. When \eqn{\alpha = 0}, the Dirichlet distribution is an
+improper prior still offering a reasonable posterior inference that
+represents the strongest shrinkage of the "general-gamma" model.
 
-The implementation of the "KM" model relies on the \pkg{REBayes} package.
-The model fitting requires the MOSEK optimization solver. Please ensure that
-\pkg{Rmosek} is correctly installed and configured.
+Parameter estimation for the "KM" model is formulated as a convex
+optimization problem. The objective function and constraints follow the same
+construction as in \pkg{REBayes}. Parameter estimation is performed using
+the open-source convex optimization package \pkg{CVXR}.
 
 The implementation of the "efron" model in this package is adapted from the
 \pkg{deconvolveR} package, developed by Bradley Efron and
 Balasubramanian Narasimhan. The original implementation in \pkg{deconvolveR}
 does not support an exposure or offset parameter in the Poisson model,
-which corresponds to the expected null value (\eqn{E_{ij}}) for each AE-drug combination.
-To address this, we modified the relevant code to allow for the inclusion
-of \eqn{E_{ij}} in the Poisson likelihood. In addition, we implemented a method for
-estimating the degrees of freedom, enabling AIC- or BIC-based hyperparameter
-selection for the "efron" model (Tan et al. 2025).
+which corresponds to the expected null value (\eqn{E_{ij}}) for each AE-drug
+combination. To address this, we modified the relevant code to allow for the
+inclusion of \eqn{E_{ij}} in the Poisson likelihood. In addition, we
+implemented a method for estimating the degrees of freedom, enabling AIC- or
+BIC-based hyperparameter selection for the "efron" model (Tan et al. 2025).
 See \code{\link{pvEBayes_tune}} for details.
 }
 \examples{
@@ -93,36 +117,115 @@ ref_table <- statin2025_44
 
 # set up signal matrix with one signal at entry (1,1)
 sig_mat <- matrix(1, nrow(ref_table), ncol(ref_table))
-sig_mat[1, 1] <- 2
+sig_mat[c(1, 5), 1] <- 2
 
-# set up structural zero matrix
-Z <- matrix(0, nrow(ref_table), ncol(ref_table))
-Z[5, 1] <- 1
 
 simu_table <- generate_contin_table(
   ref_table = ref_table,
   signal_mat = sig_mat,
-  n_table = 1,
-  Variation = TRUE,
-  zi_indic_mat = Z
-)[[1]][[1]]
+  n_table = 1
+)[[1]]
 
 
 # fit general-gamma model with a specified alpha
 fit <- pvEBayes(
-  contin_table = simu_table, model = "general-gamma",
-  alpha = 0.3, n_posterior_draws = 1000
+  contin_table = simu_table,
+  model = "general-gamma",
+  alpha = 0.3,
+  n_posterior_draws = 1000,
+  E = NULL,
+  maxi = NULL
 )
+
+# fit K-gamma model with K = 3
+fit_Kgamma <- pvEBayes(
+  contin_table = simu_table, model = "K-gamma",
+  K = 3, n_posterior_draws = 1000
+)
+
+
+# fit Efron model with specified hyperparameters
+# p = 40, c0 = 0.05
+
+\dontrun{
+fit_efron <- pvEBayes(
+  contin_table = simu_table,
+  model = "efron",
+  p = 40,
+  c0 = 0.05,
+  n_posterior_draws = 1000
+)
+}
+
+# fit GPS model and comapre with 'openEBGM'
+
+
+fit_gps <- pvEBayes(simu_table, model = "GPS")
+
+\dontrun{
+
+## Optional comparison with openEBGM (only if installed)
+
+## tol_ecm is the absolute tolerance for ECM stopping rule.
+## It is set to ensure comparability to `openEBGM`.
+
+fit_gps <- pvEBayes(simu_table, model = "GPS", tol_ecm = 1e-2)
+
+if (requireNamespace("openEBGM", quietly = TRUE)) {
+  E <- estimate_null_expected_count(simu_table)
+  simu_table_stacked <- as.data.frame(as.table(simu_table))
+  simu_table_stacked$E <- as.vector(E)
+  colnames(simu_table_stacked) <- c("var1", "var2", "N", "E")
+  simu_table_stacked_squash <- openEBGM::autoSquash(simu_table_stacked)
+
+  hyper_estimates <- openEBGM::hyperEM(simu_table_stacked_squash,
+    theta_init = c(2, 1, 2, 2, 0.2),
+    method = "nlminb",
+    N_star = NULL,
+    zeroes = TRUE,
+    param_upper = Inf,
+    LL_tol = 1e-2,
+    max_iter = 10000
+  )
+}
+
+theta_hat <- hyper_estimates$estimates
+qn <- openEBGM::Qn(theta_hat,
+  N = simu_table_stacked$N,
+  E = simu_table_stacked$E
+)
+
+simu_table_stacked$q05 <- openEBGM::quantBisect(5,
+  theta_hat = theta_hat,
+  N = simu_table_stacked$N,
+  E = simu_table_stacked$E,
+  qn = qn
+)
+
+## obtain the detected signal provided by openEBGM
+simu_table_stacked \%>\%
+  subset(q05 > 1.001)
+
+## detected signal from pvEBayes presented in the same way as openEBGM
+fit_gps \%>\%
+  summary(return = "posterior draws") \%>\%
+  apply(c(2, 3), quantile, prob = 0.05) \%>\%
+  as.table() \%>\%
+  as.data.frame() \%>\%
+  subset(Freq > 1.001)
+}
 
 }
 \references{
 DuMouchel W. Bayesian data mining in large frequency tables, with an
-application to the FDA spontaneous reporting system. \emph{The American Statistician.}
-1999; 1;53(3):177-90. \cr
+application to the FDA spontaneous reporting system.
+\emph{The American Statistician.} 1999; 1;53(3):177-90. \cr
 
-Tan Y, Markatou M and Chakraborty S. Flexible Empirical Bayesian Approaches to
-Pharmacovigilance for Simultaneous Signal Detection and Signal Strength Estimation
-in Spontaneous Reporting Systems Data. \emph{arXiv preprint.} 2025; arXiv:2502.09816.
+Tan Y, Markatou M and Chakraborty S. Flexible Empirical Bayesian Approaches
+to Pharmacovigilance for Simultaneous Signal Detection and Signal Strength
+Estimation in Spontaneous Reporting Systems Data.
+\emph{Statistics in Medicine.} 2025; 44: 18-19,
+https://doi.org/10.1002/sim.70195.
 
 Narasimhan B, Efron B. deconvolveR: A G-modeling program for deconvolution
 and empirical Bayes estimation. \emph{Journal of Statistical Software}.
@@ -130,4 +233,7 @@ and empirical Bayes estimation. \emph{Journal of Statistical Software}.
 
 Koenker R, Gu J. REBayes: an R package for empirical Bayes mixture methods.
 \emph{Journal of Statistical Software}. 2017; 4;82:1-26.
+
+Fu, A, Narasimhan, B, Boyd, S. CVXR: An R Package for Disciplined Convex
+Optimization. \emph{Journal of Statistical Software}. 2020; 94;14:1-34.
 }

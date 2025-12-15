@@ -10,10 +10,11 @@
 \item{object}{a \code{pvEBayes} object, which is the output of the function
 \link{pvEBayes} or \link{pvEBayes_tune}.}
 
-\item{return}{A character string specifying which component the summary
+\item{return}{a character string specifying which component the summary
 function should return.Valid options include: "prior parameters",
 "likelihood", "detected signal" and "posterior draws". If set to NULL
-(default), all components will be returned in a list.}
+(default), all components will be returned in a list. Note that the input
+for 'return' is case-sensitive.}
 
 \item{...}{other input parameters. Currently unused.}
 }
@@ -34,4 +35,5 @@ obj <- pvEBayes(
 )
 
 summary(obj)
+
 }

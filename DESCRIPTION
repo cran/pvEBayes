@@ -1,6 +1,6 @@
 Package: pvEBayes
 Title: Empirical Bayes Methods for Pharmacovigilance
-Version: 0.1.2
+Version: 0.2.0
 Authors@R: c(
     person(
     "Yihao", "Tan", 
@@ -23,22 +23,24 @@ Authors@R: c(
       comment = c(ORCID = "0009-0007-8972-6682"))
     )
 Maintainer: Yihao Tan <yihaotan@buffalo.edu>
-Description: A suite of empirical Bayes methods to use in pharmacovigilance. Contains various model fitting and post-processing functions. For more details see Tan et al. (2025) <doi:10.48550/arXiv.2502.09816>, Koenker and Mizera (2014) <doi:10.1080/01621459.2013.869224> and Efron (2016) <doi:10.1093/biomet/asv068>.
+Description: A suite of empirical Bayes methods to use in pharmacovigilance. Contains various model fitting and post-processing functions. For more details see Tan et al. (2025) <doi:10.48550/arXiv.2502.09816>, <doi:10.48550/arXiv.2512.01057>; Koenker and Mizera (2014) <doi:10.1080/01621459.2013.869224>; Efron (2016) <doi:10.1093/biomet/asv068>.
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Depends: R (>= 3.6.0)
 Imports: data.table, ggdist, ggfittext, ggplot2, glue, graphics,
         magrittr, methods, SobolSequence, stats, wacolors, Rcpp,
-        REBayes, splines
+        splines, CVXR
 LinkingTo: Rcpp, RcppEigen
 LazyData: true
-Suggests: testthat (>= 3.0.0), Rmosek
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://github.com/YihaoTancn/pvEBayes
+URL: https://github.com/YihaoTancn/pvEBayes,
+        https://yihaotancn.github.io/pvEBayes/
 BugReports: https://github.com/YihaoTancn/pvEBayes/issues
+VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2025-09-26 19:02:24 UTC; yihao
+Packaged: 2025-12-15 19:17:09 UTC; yihao
 Author: Yihao Tan [aut, cre] (ORCID: <https://orcid.org/0009-0002-9196-8166>),
   Marianthi Markatou [aut] (ORCID:
     <https://orcid.org/0000-0002-1453-8229>),
@@ -47,4 +49,4 @@ Author: Yihao Tan [aut, cre] (ORCID: <https://orcid.org/0009-0002-9196-8166>),
   Raktim Mukhopadhyay [aut] (ORCID:
     <https://orcid.org/0009-0007-8972-6682>)
 Repository: CRAN
-Date/Publication: 2025-10-01 07:50:07 UTC
+Date/Publication: 2025-12-15 20:10:08 UTC

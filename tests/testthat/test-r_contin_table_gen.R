@@ -4,7 +4,8 @@ test_that("multiplication works", {
   random_table <- generate_contin_table(ref_table = valid_matrix)[[1]]
   expect_equal(dim(random_table), dim(valid_matrix))
 
-  random_table2 <- generate_contin_table(ref_table = valid_matrix,
+  random_table2 <- generate_contin_table(
+    ref_table = valid_matrix,
     Variation = TRUE
   )[[1]][[1]]
   expect_equal(dim(random_table2), dim(valid_matrix))
