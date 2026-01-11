@@ -1,10 +1,10 @@
-cad657a1d86e93aba8f149c7066ad146 *DESCRIPTION
+eebf750aa97a0dbeacbeb0c868b9184c *DESCRIPTION
 0b48a07a8b5c985bcbbc6a47a6546323 *NAMESPACE
 c341e3c86307a91ff666b165c65a0416 *R/RcppExports.R
 07fd7b244b98673df9a48681232f27b7 *R/data.R
 2e577272ed282d964ce5995e53a8451a *R/global_var.R
-45d0563fe06a87b6827031d2ff8f3471 *R/pvEBayes-package.R
-ba3d15f4bc2f1af30bff127351cc3968 *R/pvEBayes_main_function.R
+a5a2409ac145794f0ec47bc958ffa965 *R/pvEBayes-package.R
+2e448b4c55eeed92b60516840d02b27d *R/pvEBayes_main_function.R
 d3c87df209fbd6e991b27c5bcf3ef9c6 *R/pvEBayes_object_S3_methods.R
 b7eaa7a0636e1e9463ee1c4debc6cdd4 *R/r_contin_table_gen.R
 660ae1911fd7e4d3311ede016118dc53 *R/srr-stats-standards.R
@@ -20,7 +20,7 @@ ff147f334311750564139e21c2ad11ab *data/statin42.rda
 e1a686ca7e8743c4802e6701d3184e28 *inst/WORDLIST
 73820b7336780b3c6030e6f7da2696a7 *inst/doc/pvEBayes-introduction.R
 1bb5b13acb320be9b535449f7174538d *inst/doc/pvEBayes-introduction.Rmd
-d948380229de707ed329fbd33d2f28b4 *inst/doc/pvEBayes-introduction.html
+6b5bde156479eb9321320aa2bf89401b *inst/doc/pvEBayes-introduction.html
 18d6d0e1fb893dec4e5744937bf4002e *man/AIC.pvEBayes.Rd
 8561705a533595a7d23d21cf54eb1189 *man/BIC.pvEBayes.Rd
 c9c213c04f6fa56dd565a9e2c35244ec *man/calculate_tilde_e.Rd

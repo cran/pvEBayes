@@ -158,10 +158,18 @@ estimate_null_expected_count <- function(contin_table) {
 #' @keywords internal
 #' @noRd
 .seq_sobol <- function(from, to, length.out) {
-  sobol_seq <- SobolSequence::sobolSequence.points(
-    dimR = 2, dimF2 = 14,
-    count = length.out
-  )[, 1]
+  sobol_seq <- numeric(length.out)
+  for (i in 0:(length.out-1)) {
+    x <- 0
+    k <- i
+    base <- 0.5
+    while (k > 0) {
+      if (k %% 2 == 1) x <- x + base
+      k <- k %/% 2 # Integer division
+      base <- base / 2
+    }
+    sobol_seq[i] <- x
+  }
   range <- to - from
   res <- sobol_seq * range + from
   res
