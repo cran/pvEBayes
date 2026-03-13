@@ -67,7 +67,8 @@
 #' modified from \code{deconvolveR} to support \eqn{E_{ij}} in Poisson model.
 #'
 #'
-#' For an introduction to \code{pvEBayes}, see the vignette.
+#' For a detailed introduction to \code{pvEBayes}, see Tan et al.
+#' (\emph{arxiv}, 2025) and package Vignette.
 #'
 #' @author
 #' Yihao Tan, Marianthi Markatou, Saptarshi Chakraborty and Raktim Mukhopadhyay.

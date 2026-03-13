@@ -4,7 +4,7 @@
 \alias{.KM_fit}
 \title{Fit a Koenker-Mizera (KM) model for a contingency table.}
 \usage{
-.KM_fit(N, E, rtol_KM = 1e-06)
+.KM_fit(N, E, rtol_KM = 1e-04)
 }
 \arguments{
 \item{N}{an IxJ contingency table showing pairwise counts of

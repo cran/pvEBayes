@@ -1,3 +1,8 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 
 # R package `pvEBayes`
 
@@ -7,75 +12,85 @@
 [![Codecov test coverage](https://codecov.io/gh/YihaoTancn/pvEBayes/graph/badge.svg)](https://app.codecov.io/gh/YihaoTancn/pvEBayes)
 [![CodeFactor](https://www.codefactor.io/repository/github/yihaotancn/pvebayes/badge)](https://www.codefactor.io/repository/github/yihaotancn/pvebayes)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+<!--[![Status at rOpenSci Software Peer Review](https://badges.ropensci.org/746_status.svg)](https://github.com/ropensci/software-review/issues/746)-->
 <!-- badges: end -->
 
 `pvEBayes` is an R package that implements a suite of nonparametric empirical
-Bayes methods for pharmacovigilance, including Gamma-Poisson Shrinker (GPS),
+Bayes methods for pharmacovigilance, including the Gamma-Poisson Shrinker (GPS),
 K-gamma, general-gamma, Koenker-Mizera (KM), and Efron models. It provides tools
 for fitting these models to the spontaneous reporting system (SRS) frequency 
 tables, extracting summaries, performing hyperparameter tuning, and generating 
-graphical summaries (eye plots and heatmaps) for signal detection and 
-estimation.
+graphical summaries (eye plots and heatmaps) for signal detection and signal 
+strength estimation.
 
 **Spontaneous Reporting System (SRS) Table**: An drug safety SRS dataset 
 catalogs AE reports on *I* AE rows across *J* drug columns. Let ${N_{ij}}$ 
 denote the number of reported cases for the *i*-th AE and the *j*-th drug, 
 where ${i = 1,..., I}$ and ${j = 1,..., J}$. 
 
-**Empirical Bayes modeling for disproportionality analysis**: We assume that for 
-each AE-drug pair, $N_{ij} \sim \text{Poisson}(\lambda_{ij} E_{ij})$, where 
-${E_{ij}}$ is the expected baseline value, measuring the expected count of the 
-AE-drug pair when there is no association between*i*-th AE and *j*-th drug. 
-The parameter ${\lambda_{ij} \geq 0}$ represents the relative reporting ratio, 
-the signal strength, for the ${(i, j)}$-th pair, measuring the ratio of the 
-actual expected count arising due to dependence on the null baseline expected 
-count. Current disproportionality analysis mainly focuses on *signal detection* 
-which seeks to determine whether the observation $N_{ij}$ is substantially 
-greater than the corresponding null baseline $E_{ij}$. Under the Poisson model, 
-that is to say, its signal strength $\lambda_{ij}$ is significantly greater 
-than 1.
+**Empirical Bayes modeling for disproportionality analysis**: 
 
-In addition to *signal detection*, Tan et al. (*Stat. in Med.*, 2025) broaden 
-the role of disproportionality to *signal estimation*. The use of the flexible 
-non-parametric empirical Bayes models enables more nuanced empirical Bayes 
-posterior inference (parameter estimation and uncertainty quantification) on 
-signal strength parameter $\{ \lambda_{ij} \}$. This allows researchers to 
-distinguish AE-drug pairs that would appear similar under a binary signal 
-detection framework. For example, the AE-drug pairs with signal strengths of 
-1.5 and 4.0 could both be significantly greater than 1 and detected as a 
-signal. Such differences in signal strength may have distinct implications in 
-medical and clinical contexts.
-
-The methods included in `pvEBayes` differ by their assumptions on the prior 
-distribution. Implemented methods include the Gamma-Poisson Shrinker (GPS),
-Koenker-Mizera (KM) method, Efron’s nonparametric empirical Bayes approach,
-the K-gamma model, and the general-gamma model. The selection of the prior 
-distribution is critical in Bayesian analysis. The GPS model uses a gamma 
-mixture prior by assuming the signal/non-signal structure in SRS data. 
-However, in real-world setting, signal strengths ${(\lambda_{ij})}$ are 
-often heterogeneous and thus follows a multi-modal distribution, making it
-difficult to assume a parametric prior. Non-parametric empirical Bayes models 
-(KM, Efron, K-gamma and general-gamma) address this challenge by utilizing a 
-flexible prior with a general mixture form and estimating the prior 
-distribution in a data-driven way.    
+  - Model each AE-drug count as 
+  $N_{ij} \sim \text{Poisson}(\lambda_{ij} E_{ij})$, $N_{ij} = 0, 1, 2, \dots$
+  
+  - $E_{ij}$: expected baseline value assuming no AE-drug association.
+  
+  - $\lambda_{ij} > 0$: relative reporting ratio / signal strength for the 
+  (i,j)-th AE-drug pair (multiplicative deviation from the null baseline value).
 
 
-**Implementations**: The KM method has an existing implementation in the 
-`REBayes` package, but it relies on Mosek, a commercial convex optimization 
-solver, which may limit accessibility due to licensing issues. The `pvEBayes` 
-package provides an alternative fully open-source implementation of the KM 
-method using `CVXR`. Efron’s method also has a general nonparametric empirical 
-Bayes implementation in the `deconvolveR` package; however, that
-implementation does not support an exposure or offset parameter in the
-Poisson model, which corresponds to the expected null value ${E_{ij}}$. In
-`pvEBayes`, the implementation of Efron's method is adapted and
-modified from `deconvolveR` to support ${E_{ij}}$ in the Poisson model.
+**From signal detection to signal strength $\lambda$ estimation**
 
-In addition, this package implements the novel bi-level Expectation
-Conditional Maximization (ECM) algorithm proposed by Tan et al. (2025) for
-efficient parameter estimation in gamma mixture prior based models mentioned
-above.
+  - Traditional disproportionality analysis emphasizes **signal detection**: 
+  identify AE-drug pairs with observed counts substantially larger than 
+  its null value, i.e., $\lambda_{ij} > 1$.
+  
+  - Tan et al. (*Stat. in Med.*, 2025) extend this to 
+  **signal strength estimation**: estimate $\{\lambda_{ij}\}$ and quantify 
+  uncertainty via flexible nonparametric empirical Bayes posterior distribution.
+  
+  - Signal estimation helps distinguish AE-drug pairs that look identical under 
+  a binary signal detection framework (e.g., $\lambda=1.5$ vs $\lambda=4.0$), 
+  which can have different clinical implications.
 
+**Methods implemented in `pvEBayes` (differ by prior assumptions):**
+
+  - Gamma-Poisson Shrinker (GPS)
+  
+  - Koenker–Mizera method (KM)
+  
+  - Efron’s nonparametric empirical Bayes approach
+  
+  - K-gamma method
+  
+  - General-gamma method
+  
+**Why nonparametric priors?**
+
+  - GPS uses a 2 gamma mixture prior motivated by a signal/non-signal structure.
+  
+  - Real-world signal strengths $\lambda_{ij}$ can be heterogeneous, and the 
+  underlying (prior) distribution over $\lambda_{ij}$ may be multi-modal with
+  multiple distinct peaks, making simple parametric priors hard to justify.
+  
+  - Nonparametric empirical Bayes methods (KM, Efron, general-gamma) address 
+  this challenge by utilizing a flexible prior with a general mixture form and 
+  estimating the prior distribution in a data-driven way. 
+
+**Implementation highlights:**
+
+  - Provides a fully open-source KM implementation using `CVXR` (avoids reliance 
+  on the commercial Mosek solver used by `REBayes`).
+  
+  - Adapts Efron’s approach from `deconvolveR` to support the exposure/offset 
+  $E_{ij}$ in the Poisson model (not supported in the original implementation).
+  
+  - Implements the bi-level Expectation Conditional Maximization (ECM) algorithm 
+  from Tan et al. (*Stat. in Med.*, 2025) for prior estimation for 
+  gamma-mixture prior based models (GPS, K-gamma, general-gamma).
+  
+For a detailed methodological description, see Tan et al. 
+(*Stat. in Med.*, 2025).
 
 
 ## Installation

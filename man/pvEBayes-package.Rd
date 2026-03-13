@@ -68,7 +68,8 @@ Poisson model, which corresponds to the expected null value \eqn{E_{ij}}.
 In \code{pvEBayes}, the implementation of the Efron's method is adapted and
 modified from \code{deconvolveR} to support \eqn{E_{ij}} in Poisson model.
 
-For an introduction to \code{pvEBayes}, see the vignette.
+For a detailed introduction to \code{pvEBayes}, see Tan et al.
+(\emph{arxiv}, 2025) and package Vignette.
 }
 \references{
 Tan Y, Markatou M and Chakraborty S. Flexible Empirical Bayesian Approaches

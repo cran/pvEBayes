@@ -159,7 +159,7 @@ estimate_null_expected_count <- function(contin_table) {
 #' @noRd
 .seq_sobol <- function(from, to, length.out) {
   sobol_seq <- numeric(length.out)
-  for (i in 0:(length.out-1)) {
+  for (i in 0:(length.out - 1)) {
     x <- 0
     k <- i
     base <- 0.5
@@ -306,7 +306,7 @@ estimate_null_expected_count <- function(contin_table) {
 #' @returns a list of CVXR optimizer outputs
 #' @keywords internal
 #' @noRd
-.KWDual_CVXR <- function(A, d, w, rtol_KM = 1e-6, verb = FALSE) {
+.KWDual_CVXR <- function(A, d, w, rtol_KM = 1e-4, verb = FALSE) {
   m <- ncol(A)
 
   A_mat <- A
@@ -315,23 +315,67 @@ estimate_null_expected_count <- function(contin_table) {
 
   objective <- CVXR::Maximize(CVXR::sum_entries(w * log(gexpr)))
   constraints <- list(
-    fvar >= 0,
-    CVXR::sum_entries(d * fvar) == 1
+    fvar >= 1e-12,
+    CVXR::sum_entries(d * fvar) == 1,
+    gexpr >= 1e-8
   )
 
   prob <- CVXR::Problem(objective, constraints)
-  res <- CVXR::solve(prob,
-    solver = "ECOS",
-    reltol = rtol_KM,
-    verbose = verb
-  )
 
-  fhat <- as.vector(res$getValue(fvar))
-  fhat[fhat < 0] <- 0
-  ghat <- as.vector(A_mat %*% (fhat * d))
+  solvers <- c("CLARABEL", "ECOS", "SCS")
+  last_msg <- NULL
+  for (s in solvers) {
+    ans <- tryCatch({
+      obj_value <- CVXR::psolve(
+        prob,
+        solver = s,
+        verbose = verb,
+        num_iter = 200L,
+        min_terminate_step_length = 1e-3,
+        min_switch_step_length = 1e-3,
+        reltol = rtol_KM,
+        abstol = 1e-4,
+        feastol = 1e-5
+      )
 
-  list(f = fhat, g = ghat, status = res$status)
+      fhat <- as.numeric(CVXR::value(fvar))
+
+      if (is.null(fhat) || length(fhat) != m) {
+        stop(sprintf("Solver %s returned invalid length for fhat.", s))
+      }
+
+      fhat[!is.finite(fhat)] <- 0
+      fhat[fhat < 0] <- 0
+
+      ss <- sum(fhat)
+
+      if (!is.finite(ss) || ss <= 0) {
+        stop(sprintf("Solver %s returned no positive finite mass.", s))
+      }
+
+      fhat <- fhat / ss
+      ghat <- as.vector(A_mat %*% (fhat * d))
+
+      list(
+        f = fhat,
+        g = ghat,
+        solver = s,
+        objective_value = obj_value
+      )
+    }, error = function(e) {
+      last_msg <- conditionMessage(e)
+      NULL
+    })
+
+    if (!is.null(ans)) {
+      return(ans)
+    }
+  }
+
+  stop("All KM solvers failed. Last error: ", last_msg)
 }
+
+
 
 
 #' Fit a Koenker-Mizera (KM) model for a contingency table.
@@ -369,10 +413,10 @@ estimate_null_expected_count <- function(contin_table) {
 #'
 #' @returns a list of CVXR optimizer outputs
 #' @keywords internal
-.KM_fit <- function(N, E, rtol_KM = 1e-6) {
-  n_draws <- prod(dim(N)) * 3
-  if (n_draws >= 1000) {
-    n_draws <- 1000
+.KM_fit <- function(N, E, rtol_KM = 1e-4) {
+  n_draws <- prod(dim(N)) * 1.5
+  if (n_draws >= 400) {
+    n_draws <- 400
   }
   grid <- .grid_based_on_hist_log_scale_sobol(N, E, max_draws = n_draws)
   fit <- .km_eb_fit(as.vector(N),
