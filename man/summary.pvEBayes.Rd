@@ -12,16 +12,29 @@
 
 \item{return}{a character string specifying which component the summary
 function should return.Valid options include: "prior parameters",
-"likelihood", "detected signal" and "posterior draws". If set to NULL
-(default), all components will be returned in a list. Note that the input
-for 'return' is case-sensitive.}
+"likelihood", "detected signal", "posterior draws" and
+"posterior draws long format". If set to NULL
+(default), a summary table will be returned (see 'summary_table_pvEBayes()').
+Note that the input for 'return' is case-sensitive.}
 
 \item{...}{other input parameters. Currently unused.}
 }
 \value{
-a list including estimated prior parameters, log_marginal_likelihood,
-indicator matrix of detected signal and posterior_draws for each AE-drug
-pair.
+If \code{return = NULL} (default), the function returns a summary table generated
+by \code{summary_table_pvEBayes()}, after printing the fitted \code{pvEBayes} object.
+
+If \code{return} is specified, the function returns the requested component:
+\describe{
+\item{\verb{prior parameters}}{A list of estimated prior parameters.}
+\item{\code{likelihood}}{The fitted model log marginal likelihood.}
+\item{\verb{detected signal}}{A logical matrix indicating AE-drug pairs if
+\eqn{P(\lambda > 1.001 \mid N) > 0.95}. For signal detection with specified
+threshold parameters, see 'get_posterior_prob()'}
+\item{\verb{posterior draws}}{Posterior draws of the signal strength for each
+AE-drug pair in default array format. }
+\item{\verb{posterior draws long format}}{Posterior draws of the signal strength for each
+AE-drug pair in stacked long format. }
+}
 }
 \description{
 This function defines the S3 \code{summary} method for objects of class

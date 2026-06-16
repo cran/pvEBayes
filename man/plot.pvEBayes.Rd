@@ -12,8 +12,7 @@
 
 \item{type}{character string determining the type of plot to show.
 Available choices are \code{"eyeplot"} which calls \link{eyeplot_pvEBayes} and
-\code{"heatmap"} which calls \link{heatmap_pvEBayes}. Note that the input for
-'type' is case-sensitive.}
+\code{"heatmap"} which calls \link{heatmap_pvEBayes}.}
 
 \item{...}{additional arguments passed to heatmap_pvEBayes or
 eyeplot_pvEBayes.}

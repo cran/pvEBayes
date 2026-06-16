@@ -79,6 +79,8 @@ extract_all_fitted_models <- function(object) {
 #' \link{pvEBayes} or \link{pvEBayes_tune}.
 #' @param n_posterior_draws number of posterior draws for each AE-drug
 #' combination.
+#' @param verbose logical. If is TRUE (default), a progress bar is displayed to
+#' the console.
 #'
 #' @return
 #'
@@ -102,7 +104,8 @@ extract_all_fitted_models <- function(object) {
 #' @srrstats {G2.4, G2.4a, G2.8} explicit conversion is used for integer input.
 #'
 posterior_draws <- function(obj,
-                            n_posterior_draws = 1000) {
+                            n_posterior_draws = 1000,
+                            verbose = TRUE) {
   stopifnot(is.pvEBayes(obj))
   if (
     !(is.numeric(n_posterior_draws) && length(n_posterior_draws) == 1 &&
@@ -116,10 +119,16 @@ posterior_draws <- function(obj,
     generate_posterior_fun <- .generate_posterior_gamma_mix
   }
   start_time <- Sys.time()
+  if (verbose) {
+    cli::cli_progress_step("Generating {n_posterior_draws} posterior draws...")
+  }
   obj$posterior_draws <- generate_posterior_fun(obj$contin_table,
     obj$E, obj,
     nsim = n_posterior_draws
   )
+  if (verbose) {
+    cli::cli_progress_done()
+  }
   end_time <- Sys.time()
   obj$fit_time <- difftime(end_time, start_time)
   obj
@@ -165,13 +174,26 @@ posterior_draws <- function(obj,
 #'
 #' @param obj a \code{pvEBayes} object, which is the output of the function
 #' \link{pvEBayes} or \link{pvEBayes_tune}.
+#' @param cutoff_signal numeric. Threshold for signal detection. An AE-drug
+#' combination is classified as a detected signal if its 5th posterior
+#' percentile exceeds this threshold.
 #'
 #' @returns a matrix
-#' @keywords internal
-#' @noRd
-.get_posterior_prob <- function(obj) {
+#' @export
+#'
+#' @examples
+#'
+#' fit <- pvEBayes(
+#'   contin_table = statin2025_44, model = "general-gamma",
+#'   alpha = 0.3, n_posterior_draws = 1000
+#' )
+#'
+#' posterior_probs <- get_posterior_prob(fit,
+#' cutoff_signal = 1.001)
+get_posterior_prob <- function(obj,
+                               cutoff_signal = 1.001) {
   tmp <- obj$posterior_draws
-  (tmp > 1.001) %>%
+  (tmp > cutoff_signal) %>%
     apply(c(2, 3), mean)
 }
 
@@ -257,8 +279,6 @@ posterior_draws <- function(obj,
 #' described in the corresponding documentation.
 #' @srrstats {G2.4, G2.4a, G2.4b, G2.4c, G2.8} explicit conversion is used for
 #' integer, continuous and character inputs.
-#' @srrstats {G2.9, G2.10} inconsistent return when extracting a matrix is
-#' addressed.
 #'
 eyeplot_pvEBayes <- function(x,
                              num_top_AEs = 10,
@@ -604,8 +624,6 @@ eyeplot_pvEBayes <- function(x,
 #' described in the corresponding documentation.
 #' @srrstats {G2.4, G2.4a, G2.4b, G2.4c, G2.8} explicit conversion is used for
 #' integer, continuous and character inputs.
-#' @srrstats {G2.9, G2.10} inconsistent return when extracting a matrix is
-#' addressed.
 #'
 heatmap_pvEBayes <- function(x,
                              num_top_AEs = 10,
@@ -866,6 +884,10 @@ print.pvEBayes <- function(x, ...) {
       round(4),
     " seconds."
   )
+  run_time_txt0 <- ifelse(x$convergence == 0,
+    "Optimizer convergence: successful.",
+    "Optimizer convergence: not achieved."
+  )
   if (!is.null(x$draws_time)) {
     run_time_txt2 <- glue::glue(
       "Running time for posterior draws \n (",
@@ -881,6 +903,7 @@ print.pvEBayes <- function(x, ...) {
   }
   run_time_txt <- glue::glue(
     "{run_time_txt1}
+    {run_time_txt0}
     {run_time_txt2}
     "
   )
@@ -900,6 +923,163 @@ print.pvEBayes <- function(x, ...) {
 }
 
 
+#' Obtain a summary table for a pvEBayes object
+#'
+#' @param x a \code{pvEBayes} object, which is the output of the function
+#' \link{pvEBayes} or \link{pvEBayes_tune}.
+#' @param cutoff_signal numeric. Threshold for signal detection. An AE-drug
+#' combination is classified as a detected signal if its 5th posterior
+#' percentile exceeds this threshold.
+#'
+#' @returns a data.table that summarizes reporting count (N), expected null
+#' value (E), posterior probability of being a signal (post_prob), posterior
+#' signal strength median (q50), 5-th and 95-th posterior signal strength
+#' percentile (q05 and q95) for each AE-drug combination.
+#' @export
+#'
+#' @examples
+#'
+#' fit <- pvEBayes(
+#'   contin_table = statin2025_44, model = "general-gamma",
+#'   alpha = 0.5, n_posterior_draws = 100
+#' )
+#'
+#' summary_table_pvEBayes(fit)
+#'
+summary_table_pvEBayes <- function(x, cutoff_signal = 1.001) {
+  stopifnot(is.pvEBayes(x))
+  if (is.null(x$posterior_draws)) {
+    x <- posterior_draws(x, n_posterior_draws = 1000)
+  }
+  counts_long <- x$contin_table %>%
+    as.data.frame() %>%
+    .rownames_to_column(var = "AE") %>%
+    data.table::as.data.table() %>%
+    data.table::melt(
+      id.vars = "AE",
+      variable.name = "drug", value.name = "N"
+    )
+  Es_long <- x$E
+  Es_long <- Es_long %>%
+    round(2) %>%
+    as.data.frame() %>%
+    .rownames_to_column(var = "AE") %>%
+    data.table::as.data.table() %>%
+    data.table::melt(
+      id.vars = "AE", variable.name = "drug",
+      value.name = "E"
+    )
+  counts_long <- counts_long %>% .left_join_base(Es_long,
+    by = c("AE", "drug")
+  )
+  post_prob_matrix <- x$posterior_draws %>%
+    {
+      . > cutoff_signal
+    } %>%
+    apply(c(2, 3), mean)
+
+  q05 <- x$posterior_draws %>%
+    apply(c(2, 3), stats::quantile, prob = 0.05) %>%
+    as.data.frame() %>%
+    .rownames_to_column(var = "AE") %>%
+    data.table::as.data.table() %>%
+    data.table::melt(
+      id.vars = "AE",
+      variable.name = "drug",
+      value.name = "q05"
+    )
+  q50 <- x$posterior_draws %>%
+    apply(c(2, 3), stats::quantile, prob = 0.5) %>%
+    as.data.frame() %>%
+    .rownames_to_column(var = "AE") %>%
+    data.table::as.data.table() %>%
+    data.table::melt(
+      id.vars = "AE",
+      variable.name = "drug",
+      value.name = "q50"
+    )
+  q95 <- x$posterior_draws %>%
+    apply(c(2, 3), stats::quantile, prob = 0.95) %>%
+    as.data.frame() %>%
+    .rownames_to_column(var = "AE") %>%
+    data.table::as.data.table() %>%
+    data.table::melt(
+      id.vars = "AE",
+      variable.name = "drug",
+      value.name = "q95"
+    )
+  post_prob <- post_prob_matrix %>%
+    as.data.frame() %>%
+    .rownames_to_column(var = "AE") %>%
+    data.table::as.data.table() %>%
+    data.table::melt(
+      id.vars = "AE",
+      variable.name = "drug",
+      value.name = "post_prob"
+    )
+
+  counts_long <- counts_long %>%
+    .left_join_base(post_prob, by = c("AE", "drug")) %>%
+    .left_join_base(q05, by = c("AE", "drug")) %>%
+    .left_join_base(q50, by = c("AE", "drug")) %>%
+    .left_join_base(q95, by = c("AE", "drug"))
+
+  counts_long$AE <- (counts_long$AE %>% .capitalize_words())
+  counts_long$drug <- (counts_long$drug %>% .capitalize_words())
+  data.table::setDT(counts_long)
+  counts_long
+}
+
+
+
+#' Convert posterior draws to long format
+#'
+#' @param posterior_draws an 3-d array that contains posterior draws
+#'
+#' @returns
+#' A long data.table
+#' @keywords internal
+#' @noRd
+.posterior_draws_to_long <- function(posterior_draws) {
+  if (is.null(posterior_draws)) {
+    stop(
+      "No posterior draw has been generated. See `posterior_draws()`."
+    )
+  }
+
+  value_name = "lambda"
+  d <- dim(posterior_draws)
+  dn <- dimnames(posterior_draws)
+
+  draw_names <- dn[[1L]]
+  AE_names <- dn[[2L]]
+  drug_names <- dn[[3L]]
+
+  if (is.null(draw_names)) {
+    draw_names <- as.character(seq_len(d[1L]))
+  }
+
+  if (is.null(AE_names)) {
+    AE_names <- paste0("AE", seq_len(d[2L]))
+  }
+
+  if (is.null(drug_names)) {
+    drug_names <- paste0("drug", seq_len(d[3L]))
+  }
+
+  dimnames(posterior_draws) <- list(
+    draw = draw_names,
+    AE = AE_names,
+    drug = drug_names
+  )
+
+  out <- data.table::as.data.table(as.table(posterior_draws))
+  data.table::setnames(out, c("draw", "AE", "drug", value_name))
+
+
+  out[]
+}
+
 
 #' Summary method for a pvEBayes object
 #'
@@ -913,16 +1093,30 @@ print.pvEBayes <- function(x, ...) {
 #'
 #' @param return a character string specifying which component the summary
 #'  function should return.Valid options include: "prior parameters",
-#' "likelihood", "detected signal" and "posterior draws". If set to NULL
-#' (default), all components will be returned in a list. Note that the input
-#' for 'return' is case-sensitive.
+#' "likelihood", "detected signal", "posterior draws" and
+#' "posterior draws long format". If set to NULL
+#' (default), a summary table will be returned (see 'summary_table_pvEBayes()').
+#' Note that the input for 'return' is case-sensitive.
 #'
 #' @param ... other input parameters. Currently unused.
 #'
 #' @return
-#' a list including estimated prior parameters, log_marginal_likelihood,
-#' indicator matrix of detected signal and posterior_draws for each AE-drug
-#' pair.
+#'
+#' If `return = NULL` (default), the function returns a summary table generated
+#' by `summary_table_pvEBayes()`, after printing the fitted `pvEBayes` object.
+#'
+#' If `return` is specified, the function returns the requested component:
+#' \describe{
+#'   \item{`prior parameters`}{A list of estimated prior parameters.}
+#'   \item{`likelihood`}{The fitted model log marginal likelihood.}
+#'   \item{`detected signal`}{A logical matrix indicating AE-drug pairs if
+#'   \eqn{P(\lambda > 1.001 \mid N) > 0.95}. For signal detection with specified
+#'   threshold parameters, see 'get_posterior_prob()'}
+#'   \item{`posterior draws`}{Posterior draws of the signal strength for each
+#'   AE-drug pair in default array format. }
+#'   \item{`posterior draws long format`}{Posterior draws of the signal strength for each
+#'   AE-drug pair in stacked long format. }
+#' }
 #'
 #' @export
 #'
@@ -939,8 +1133,8 @@ print.pvEBayes <- function(x, ...) {
 #' properly checked.
 #' @srrstats {G2.0a, G2.1a} The length of single and vector inputs are
 #' explicitly described in the corresponding documentation.
-#' @srrstats {G2.3, G2.3a, G2.3b} character inputs are explicitly documented
-#' that they are strictly case-sensitive and only applicable to expected values.
+#' @srrstats {G2.3, G2.3a, G2.3b} tolower() is used to ensure input of character
+#' parameters is not case dependent.
 #'
 #'
 summary.pvEBayes <- function(object, return = NULL, ...) {
@@ -968,30 +1162,38 @@ summary.pvEBayes <- function(object, return = NULL, ...) {
     )
   }
   if (!is.null(return)) {
+    return <- tolower(return)
     if (return == "prior parameters") {
       estimated_prior
     } else if (return == "likelihood") {
       object$loglik
     } else if (return == "detected signal") {
-      (.get_posterior_prob(object) >= 0.95)
+      message(paste0(
+        "Signal detection result with default threshold parameters is provided",
+        ". To specify threshold parameter, see 'get_posterior_prob()'."
+      ))
+      (get_posterior_prob(object) >= 0.95)
     } else if (return == "posterior draws") {
       object$posterior_draws
+    }else if(return == "posterior draws long format"){
+      .posterior_draws_to_long(object$posterior_draws)
     } else {
       stop(
         paste0(
           "'return' must be one of the followings: ",
           "'prior parameters', 'likelihood', ",
-          "'detected signal' or 'posterior draws'."
+          "'detected signal', 'posterior draws' or ",
+          "'posterior draws long format'."
         )
       )
     }
   } else {
-    res <- list(
-      estimated_prior = estimated_prior,
-      log_marginal_likelihood = object$loglik,
-      detected_signal = (.get_posterior_prob(object) >= 0.95),
-      posterior_draws = object$posterior_draws
-    )
+    message(paste0(
+      "Posterior probabilities with default threshold parameters is provided",
+      ". To specify threshold parameter, see 'get_posterior_prob()'."
+    ))
+    res <- summary_table_pvEBayes(object)
+    print(object)
     res
   }
 }
@@ -1009,8 +1211,7 @@ summary.pvEBayes <- function(object, return = NULL, ...) {
 #' \link{pvEBayes} or \link{pvEBayes_tune}.
 #' @param type character string determining the type of plot to show.
 #' Available choices are `"eyeplot"` which calls \link{eyeplot_pvEBayes} and
-#' `"heatmap"` which calls \link{heatmap_pvEBayes}. Note that the input for
-#' 'type' is case-sensitive.
+#' `"heatmap"` which calls \link{heatmap_pvEBayes}.
 #' @param ... additional arguments passed to heatmap_pvEBayes or
 #' eyeplot_pvEBayes.
 #'
@@ -1028,14 +1229,14 @@ summary.pvEBayes <- function(object, return = NULL, ...) {
 #' checked.
 #' @srrstats {G2.0a, G2.1a} The length of single and vector inputs are explicitly
 #' described in the corresponding documentation.
-#' @srrstats {G2.3, G2.3a, G2.3b} character inputs are explicitly documented
-#' that they are strictly case-sensitive and only applicable to expected values.
+#' @srrstats {G2.3, G2.3a, G2.3b} tolower() is used to ensure input of character
+#' parameters is not case dependent.
 #'
 plot.pvEBayes <- function(x, type = "eyeplot", ...) {
   if (!is.pvEBayes(x)) {
     stop("x must be a 'pvEBayes' object.")
   }
-
+  type <- tolower(type)
   if (
     !(type %in% c("heatmap", "eyeplot"))
   ) {

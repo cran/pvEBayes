@@ -21,7 +21,7 @@ adverse events for I AEs (along the rows) and J drugs (along the columns).}
 
 \item{p_vec}{vector of hyperparameter p values to be selected. p is
 a hyperparameter in "efron" model which should be a positive integer. If is
-NULL, a default set of p values (80, 100, 120, 150, 200) will be used.}
+NULL, a default set of p values (40, 60, 80, 100, 120) will be used.}
 
 \item{c0_vec}{vector of hyperparameter c0 values to be selected. c0 is
 a hyperparameter in "efron" model which should be a positive number. If is

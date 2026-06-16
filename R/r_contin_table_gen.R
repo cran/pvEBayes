@@ -208,18 +208,18 @@ generate_contin_table <- function(n_table = 1,
   if (!(is.logical(Variation) && length(Variation) == 1)) {
     stop("'Variation' must be a single logical value (TRUE or FALSE).")
   }
+  contin_table <- as.matrix(ref_table)
+  .is_valid_contin_table(ref_table)
+  if (any(dim(ref_table) != dim(signal_mat))) {
+    stop("Invalid input: ref_table has to be the same dimension as signal_mat.")
+  }
 
-  stopifnot(
-    is.numeric(n_table),
-    n_table > 0,
-    nrow(ref_table) == nrow(signal_mat),
-    ncol(ref_table) == ncol(signal_mat)
-  )
   if (!is.null(zi_indic_mat)) {
-    stopifnot(
-      nrow(ref_table) == nrow(zi_indic_mat),
-      ncol(ref_table) == ncol(zi_indic_mat)
-    )
+    if (any(dim(ref_table) != dim(zi_indic_mat))) {
+      stop(
+        "Invalid input: ref_table has to be the same dimension as zi_indic_mat."
+      )
+    }
   } else {
     zi_indic_mat <- ref_table
     zi_indic_mat[] <- 0

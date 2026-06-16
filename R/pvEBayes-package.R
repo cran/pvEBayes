@@ -103,12 +103,39 @@
 #' @importFrom data.table .SD
 #'
 #' @srrstats {G1.0} Reference section reports the related literature.
-#' @srrstats {G1.1} The bi-level Expectation Conditional Maximization (ECM)
-#' algorithm for gamma mixture based prior models (including GPS, K-gamma and
-#' general-gamma) It is the first implementation of a novel algorithm. Our
-#' implementation for Koenker-Mizera (KM) and Efron methods are improvement
-#' to \code{REBayes} and \code{deconvolveR} package respectively to fit into
-#' disproportionality analysis on spontaneous reporting systems SRS data.
+#' @srrstats {G1.1}
+#' There is no other package that directly provides the methods implemented in
+#' `pvEBayes`, which is a suite of empirical Bayes approaches for signal
+#' detection and signal strength estimation in disproportionality analysis.
+#' Currently, there are some existing R packages applying SRS data mining.
+#' These packages focus only on signal detection.
+#'
+#' Methods implemented in `pvEBayes` include Gamma-Poisson Shrinker (GPS),
+#' Koenker–Mizera method (KM), Efron, K-gamma and general-gamma. `pvEBayes`
+#' package provides the first implementation of K-gamma and general-gamma.
+#' There are a few packages that provide functions that can, in theory, be used
+#' to provide implementations of our methods; however, substantial modifications
+#' and customizations are needed.
+#'
+#' The Gamma-Poisson Shrinker (GPS) is also available from another R package:
+#' `openEBGM`. In `pvEBayes`, the GPS is implemented by our bi-level Expectation
+#' Conditional Maximization (ECM) algorithm, offering faster and more stable GPS
+#' model fitting.
+#'
+#' The KM has a general nonparametric empirical Bayes implementation in the
+#' `REBayes` package. But `REBayes` relies on `Mosek`, a commercial convex
+#' optimization solver, which may limit accessibility due to licensing issues.
+#' The `pvEBayes` package provides an alternative fully open-source
+#' implementation of the KM method using `CVXR`.
+#'
+#' The Efron method has a general nonparametric empirical Bayes implementation
+#' in the `deconvolveR` package; however, that implementation does not support
+#' an exposure or offset parameter in the Poisson model, which corresponds to
+#' the expected null value ‘E’. In `pvEBayes`, the implementation of Efron
+#' method is adapted and modified from `deconvolveR` to support ‘E’ to model
+#' the SRS table.
+#'
+#'
 #' @srrstats {G1.2} see the 'CONTRIBUTING.md' for states of development.
 #' @srrstats {G1.3} All statistical terminologies are clarified and
 #' unambiguously defined
@@ -116,19 +143,19 @@
 #' @srrstats {G1.4a} All internal functions are documented with roxygen2.
 #' @srrstats {G1.5} Vignette reproduces the results in the associated
 #' publications.
+#' @srrstats {G2.10} All tabular inputs are coerced to matrix format before any
+#' manipulation. Subsequent column-extraction operations use `drop = FALSE` to
+#' ensure consistent behavior and avoid class-dependent simplification.
 #' @srrstats {G5.0} Several FAERS datasets are included and they are
 #' illustrated in example and vignette.
 #' @srrstats {G5.1} Relevant datasets are provided. See 'data.R'.
 #' @srrstats {G5.2, G5.2a, G5.2b} All exported functions have sufficient checks
 #' for inputs and appropriate error/warning messages after that.
-#' @srrstats {G5.3} Functions that could potentially return objects containing
-#' (`NA`) or undefined (`NaN`, `Inf`) values are tested in
-#' 'test-pvEBayes_main_function.R'.
 #' @srrstats {G5.8, G5.8a, G5.8b, G5.8c, G5.8d}
 #' Edge condition tests are provided in 'test-pvEBayes_main_function.R'.
 #' @srrstats {BS1.0} The meaning and effect of the hyperparameters in K-gamma,
 #' general-gamma and Efron methods are carefully explained in the function
-#' documentation, README and vignette.
+#' documentation and vignette.
 #' @srrstats {BS1.1} Descriptions of how to enter data are presented in both
 #' textual and code form in documentation and vignette.
 #' @srrstats {BS1.2, BS1.2a, BS1.2b, BS1.2c}
@@ -143,12 +170,12 @@
 #' procedures. Consequently, the package does not implement convergence checkers
 #' that are commonly used to assess the convergence of a full Bayesian sampler.
 #'
-#' Estimation in \pkg{pvEBayes} is performed through deterministic optimization
-#' methods: convex optimizer for the KM, log marginal likelihood optimizer for
-#' Efron model, and an ECM algorithm for the general-gamma model. These
-#' procedures have termination criteria determined by optimization tolerances
-#' rather than stochastic convergence diagnostics. The convergence criteria
-#' rtol_ecm, rtol_KM and rtol_efron are appropriately documented in the
+#' Parameter estimations in \pkg{pvEBayes} is performed through deterministic
+#' optimization methods: convex optimizer for the KM, log marginal likelihood
+#' optimizer for Efron model, and an ECM algorithm for the general-gamma model.
+#' These procedures have termination criteria determined by optimization
+#' tolerances rather than stochastic convergence diagnostics. The convergence
+#' criteria rtol_ecm, rtol_KM and rtol_efron are appropriately documented in the
 #' function-level documentation.
 #' @srrstats {BS2.1, BS2.1a} \pkg{pvEBayes} implements appropriate input checks
 #' to ensure that all user-supplied data objects are valid. The behavior of
@@ -199,7 +226,7 @@
 #' @srrstats {BS5.1} Return values include appropriate metadata on
 #' types (or classes) and dimensions of input data.
 #'
-#' @srrstats {BS5.3, BS5.4, bs5.5}
+#' @srrstats {BS5.3, bs5.5}
 #' The empirical Bayes methods implemented in \pkg{pvEBayes} do not rely on
 #' stochastic sampling, and therefore do not produce the types of
 #' convergence diagnostics typically associated with full Bayesian modeling.

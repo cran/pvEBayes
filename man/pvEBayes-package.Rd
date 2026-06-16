@@ -97,9 +97,8 @@ application to the FDA spontaneous reporting system.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/YihaoTancn/pvEBayes}
-  \item \url{https://yihaotancn.github.io/pvEBayes/}
-  \item Report bugs at \url{https://github.com/YihaoTancn/pvEBayes/issues}
+  \item \url{https://github.com/ropensci/pvEBayes}
+  \item Report bugs at \url{https://github.com/ropensci/pvEBayes/issues}
 }
 
 }

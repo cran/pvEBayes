@@ -7,7 +7,7 @@ based on AIC and BIC}
 \usage{
 pvEBayes_tune(
   contin_table,
-  model = "general-gamma",
+  model = c("general-gamma", "efron"),
   alpha_vec = NULL,
   p_vec = NULL,
   c0_vec = NULL,
@@ -36,7 +36,7 @@ will be used.}
 
 \item{p_vec}{vector of hyperparameter p values to be selected. p is
 a hyperparameter in "efron" model which should be a positive integer. If is
-NULL, a default set of p values (80, 100, 120, 150, 200) will be used.}
+NULL, a default set of p values (40, 60, 80, 100, 120) will be used.}
 
 \item{c0_vec}{vector of hyperparameter c0 values to be selected. c0 is
 a hyperparameter in "efron" model which should be a positive number. If is

@@ -6,7 +6,7 @@
 \usage{
 pvEBayes(
   contin_table,
-  model = "general-gamma",
+  model = c("general-gamma", "K-gamma", "GPS", "KM", "efron"),
   alpha = NULL,
   K = NULL,
   p = NULL,
@@ -15,8 +15,11 @@ pvEBayes(
   tol_ecm = 1e-04,
   rtol_efron = 1e-10,
   rtol_KM = 1e-06,
+  km_optimizer = c("ECOS", "CLARABEL", "SCS"),
   n_posterior_draws = 1000,
-  E = NULL
+  E = NULL,
+  message = TRUE,
+  ...
 )
 }
 \arguments{
@@ -33,8 +36,9 @@ encourages shrinkage on mixture weights of the estimated prior distribution.
 See Tan et al. (2025) for further details.}
 
 \item{K}{a integer greater than or equal to 2 indicating the number of
-mixture components in the prior distribution. It is needed if "K-gamma"
-model is used. See Tan et al. (2025) for further details.}
+mixture components in the prior distribution. It is needed if "K-gamma" model
+is used. When K is unknown, please consider its extension "general-gamma"
+instead. See Tan et al. (2025) for further details.}
 
 \item{p}{a integer greater than or equal to 2. It is needed if "efron" mode
 is used. Larger p leads to smoother estimated prior distribution. See
@@ -57,17 +61,34 @@ Default to 1e-10. See 'stats::nlminb' for detail.}
 \item{rtol_KM}{a tolerance parameter used when 'KM' model is fitted.
 Default to be 1e-6. See 'CVXR::solve' for detail.}
 
+\item{km_optimizer}{a character vector specifying the optimizer(s) in CVXR
+used to fit the KM model. Supported values are \code{"ECOS"}, \code{"CLARABEL"}, and
+\code{"SCS"}. Note that the input for km_optimizer is case-sensitive. If multiple
+optimizers are supplied, they are tried sequentially and the first
+successfully fitted result is returned. Defaults to
+c("ECOS", "CLARABEL", "SCS")\verb{. See }CVXR::psolve` for detail.}
+
 \item{n_posterior_draws}{a number of posterior draws for each AE-drug
 combination.}
 
 \item{E}{A matrix of expected counts under the null model for the SRS
 frequency table. If \code{NULL} (default), the expected counts are estimated
 from the SRS data using 'estimate_null_expected_count()'.}
+
+\item{message}{logical, indicating whether to print fitting information.
+Default to be TRUE.}
+
+\item{...}{additional parameters to be passed to optimizer for 'KM' model.
+See 'CVXR::solve' for detail.}
 }
 \value{
 The function returns an S3 object of class \code{pvEBayes} containing the
 estimated model parameters as well as posterior draws for each AE-drug
 combination if the number of posterior draws is specified.
+
+The \code{convergence} component is an integer code: \code{0} indicates successful
+convergence of the optimizer, while \code{1} indicates that the optimizer did not
+converge.
 }
 \description{
 This function fits a non-parametric empirical Bayes model to an AE-drug
@@ -86,18 +107,21 @@ Bayes model with a two gamma mixture prior distribution.
 
 Methods "K-gamma" and "general-gamma" are non-parametric empirical Bayes
 models, introduced by Tan et al. (2025). The number of mixture components "K"
-needs to be prespecified when fitting a "K-gamma" model. For "general-gamma",
-the mixture weights are regularized by a Dirichlet hyper prior with
-hyperparameter \eqn{0 \leq \alpha < 1} that controls the shrinkage strength.
-As "alpha" approaches 0, less non-empty mixture components exist in the
-fitted model. When \eqn{\alpha = 0}, the Dirichlet distribution is an
-improper prior still offering a reasonable posterior inference that
-represents the strongest shrinkage of the "general-gamma" model.
+needs to be prespecified when fitting a "K-gamma" model. When the number of
+mixture components is unknown, we recommend using the "general-gamma" model
+instead. For "general-gamma", the mixture weights are regularized by a
+Dirichlet hyper prior with hyperparameter \eqn{0 \leq \alpha < 1} that
+controls the shrinkage strength. As "alpha" approaches 0, less non-empty
+mixture components exist in the fitted model. When \eqn{\alpha = 0}, the
+Dirichlet distribution is an improper prior still offering a reasonable
+posterior inference that represents the strongest shrinkage of the
+"general-gamma" model.
 
 Parameter estimation for the "KM" model is formulated as a convex
-optimization problem. The objective function and constraints follow the same
-construction as in \pkg{REBayes}. Parameter estimation is performed using
-the open-source convex optimization package \pkg{CVXR}.
+optimization problem. The objective function and constraints are modified
+from the \pkg{REBayes} package (see 'REBayes::KWDual()'). Parameter
+estimation is performed using the open-source convex optimization package
+\pkg{CVXR}.
 
 The implementation of the "efron" model in this package is adapted from the
 \pkg{deconvolveR} package, developed by Bradley Efron and
@@ -113,33 +137,18 @@ See \code{\link{pvEBayes_tune}} for details.
 \examples{
 
 set.seed(1)
-ref_table <- statin2025_44
-
-# set up signal matrix with one signal at entry (1,1)
-sig_mat <- matrix(1, nrow(ref_table), ncol(ref_table))
-sig_mat[c(1, 5), 1] <- 2
-
-
-simu_table <- generate_contin_table(
-  ref_table = ref_table,
-  signal_mat = sig_mat,
-  n_table = 1
-)[[1]]
-
 
 # fit general-gamma model with a specified alpha
 fit <- pvEBayes(
-  contin_table = simu_table,
+  contin_table = statin2025_44,
   model = "general-gamma",
   alpha = 0.3,
-  n_posterior_draws = 1000,
-  E = NULL,
-  maxi = NULL
+  n_posterior_draws = 1000
 )
 
 # fit K-gamma model with K = 3
 fit_Kgamma <- pvEBayes(
-  contin_table = simu_table, model = "K-gamma",
+  contin_table = statin2025_44, model = "K-gamma",
   K = 3, n_posterior_draws = 1000
 )
 
@@ -147,20 +156,18 @@ fit_Kgamma <- pvEBayes(
 # fit Efron model with specified hyperparameters
 # p = 40, c0 = 0.05
 
-\dontrun{
 fit_efron <- pvEBayes(
-  contin_table = simu_table,
+  contin_table = statin2025_44,
   model = "efron",
   p = 40,
   c0 = 0.05,
   n_posterior_draws = 1000
 )
-}
 
 # fit GPS model and comapre with 'openEBGM'
 
 
-fit_gps <- pvEBayes(simu_table, model = "GPS")
+fit_gps <- pvEBayes(statin2025_44, model = "GPS")
 
 \dontrun{
 
@@ -169,16 +176,16 @@ fit_gps <- pvEBayes(simu_table, model = "GPS")
 ## tol_ecm is the absolute tolerance for ECM stopping rule.
 ## It is set to ensure comparability to `openEBGM`.
 
-fit_gps <- pvEBayes(simu_table, model = "GPS", tol_ecm = 1e-2)
+fit_gps <- pvEBayes(statin2025_44, model = "GPS", tol_ecm = 1e-2)
 
 if (requireNamespace("openEBGM", quietly = TRUE)) {
-  E <- estimate_null_expected_count(simu_table)
-  simu_table_stacked <- as.data.frame(as.table(simu_table))
-  simu_table_stacked$E <- as.vector(E)
-  colnames(simu_table_stacked) <- c("var1", "var2", "N", "E")
-  simu_table_stacked_squash <- openEBGM::autoSquash(simu_table_stacked)
+  E <- estimate_null_expected_count(statin2025_44)
+  statin2025_44_stacked <- as.data.frame(as.table(statin2025_44))
+  statin2025_44_stacked$E <- as.vector(E)
+  colnames(statin2025_44_stacked) <- c("var1", "var2", "N", "E")
+  statin2025_44_stacked_squash <- openEBGM::autoSquash(statin2025_44_stacked)
 
-  hyper_estimates <- openEBGM::hyperEM(simu_table_stacked_squash,
+  hyper_estimates <- openEBGM::hyperEM(statin2025_44_stacked_squash,
     theta_init = c(2, 1, 2, 2, 0.2),
     method = "nlminb",
     N_star = NULL,
@@ -191,19 +198,19 @@ if (requireNamespace("openEBGM", quietly = TRUE)) {
 
 theta_hat <- hyper_estimates$estimates
 qn <- openEBGM::Qn(theta_hat,
-  N = simu_table_stacked$N,
-  E = simu_table_stacked$E
+  N = statin2025_44_stacked$N,
+  E = statin2025_44_stacked$E
 )
 
-simu_table_stacked$q05 <- openEBGM::quantBisect(5,
+statin2025_44_stacked$q05 <- openEBGM::quantBisect(5,
   theta_hat = theta_hat,
-  N = simu_table_stacked$N,
-  E = simu_table_stacked$E,
+  N = statin2025_44_stacked$N,
+  E = statin2025_44_stacked$E,
   qn = qn
 )
 
 ## obtain the detected signal provided by openEBGM
-simu_table_stacked \%>\%
+statin2025_44_stacked \%>\%
   subset(q05 > 1.001)
 
 ## detected signal from pvEBayes presented in the same way as openEBGM

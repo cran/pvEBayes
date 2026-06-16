@@ -4,7 +4,13 @@
 \alias{.KM_fit}
 \title{Fit a Koenker-Mizera (KM) model for a contingency table.}
 \usage{
-.KM_fit(N, E, rtol_KM = 1e-04)
+.KM_fit(
+  N,
+  E,
+  rtol_KM = 1e-04,
+  km_optimizer = c("ECOS", "CLARABEL", "SCS"),
+  ...
+)
 }
 \arguments{
 \item{N}{an IxJ contingency table showing pairwise counts of
@@ -14,6 +20,15 @@ adverse events for I AEs (along the rows) and J drugs (along the columns).}
 frequency table.}
 
 \item{rtol_KM}{The relative tolerance on the duality gap.}
+
+\item{km_optimizer}{Character vector specifying the optimizer(s) used to fit
+the KM model. Supported values are \code{"ECOS"}, \code{"CLARABEL"}, and \code{"SCS"}.
+If multiple optimizers are supplied, they are tried sequentially and the
+first successfully fitted result is returned. Defaults to
+c("ECOS", "CLARABEL", "SCS")`.}
+
+\item{...}{additional parameters to be passed to optimizer for 'KM' model.
+See 'CVXR::solve' for detail.}
 }
 \value{
 a list of CVXR optimizer outputs

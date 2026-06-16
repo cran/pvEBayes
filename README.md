@@ -1,18 +1,11 @@
----
-output:
-  html_document: default
-  pdf_document: default
----
-
 # R package `pvEBayes`
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/pvEBayes)](https://CRAN.R-project.org/package=pvEBayes)
-[![R-CMD-check](https://github.com/YihaoTancn/pvEBayes/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/YihaoTancn/pvEBayes/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/YihaoTancn/pvEBayes/graph/badge.svg)](https://app.codecov.io/gh/YihaoTancn/pvEBayes)
-[![CodeFactor](https://www.codefactor.io/repository/github/yihaotancn/pvebayes/badge)](https://www.codefactor.io/repository/github/yihaotancn/pvebayes)
+[![R-CMD-check](https://github.com/ropensci/pvEBayes/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ropensci/pvEBayes/actions/workflows/R-CMD-check.yaml)
+[![codecov](https://app.codecov.io/gh/ropensci/pvEBayes/graph/badge.svg?token=niz0ulibvt)](https://app.codecov.io/gh/ropensci/pvEBayes)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-<!--[![Status at rOpenSci Software Peer Review](https://badges.ropensci.org/746_status.svg)](https://github.com/ropensci/software-review/issues/746)-->
+[![Status at rOpenSci Software Peer Review](https://badges.ropensci.org/760_status.svg)](https://github.com/ropensci/software-review/issues/760)
 <!-- badges: end -->
 
 `pvEBayes` is an R package that implements a suite of nonparametric empirical
@@ -21,14 +14,16 @@ K-gamma, general-gamma, Koenker-Mizera (KM), and Efron models. It provides tools
 for fitting these models to the spontaneous reporting system (SRS) frequency 
 tables, extracting summaries, performing hyperparameter tuning, and generating 
 graphical summaries (eye plots and heatmaps) for signal detection and signal 
-strength estimation.
+strength estimation. The package does not perform SRS frequency table 
+preprocessing, such as raw individual case safety reports (ICSRs) aggregrating. 
+These steps should be handled before using `pvEBayes`.
 
 **Spontaneous Reporting System (SRS) Table**: An drug safety SRS dataset 
 catalogs AE reports on *I* AE rows across *J* drug columns. Let ${N_{ij}}$ 
 denote the number of reported cases for the *i*-th AE and the *j*-th drug, 
 where ${i = 1,..., I}$ and ${j = 1,..., J}$. 
 
-**Empirical Bayes modeling for disproportionality analysis**: 
+**Empirical Bayes modeling for SRS data mining**: 
 
   - Model each AE-drug count as 
   $N_{ij} \sim \text{Poisson}(\lambda_{ij} E_{ij})$, $N_{ij} = 0, 1, 2, \dots$
@@ -41,7 +36,7 @@ where ${i = 1,..., I}$ and ${j = 1,..., J}$.
 
 **From signal detection to signal strength $\lambda$ estimation**
 
-  - Traditional disproportionality analysis emphasizes **signal detection**: 
+  - Traditional SRS data mining emphasizes **signal detection**: 
   identify AE-drug pairs with observed counts substantially larger than 
   its null value, i.e., $\lambda_{ij} > 1$.
   
@@ -89,6 +84,10 @@ where ${i = 1,..., I}$ and ${j = 1,..., J}$.
   from Tan et al. (*Stat. in Med.*, 2025) for prior estimation for 
   gamma-mixture prior based models (GPS, K-gamma, general-gamma).
   
+  - Supports AIC/BIC-based hyperparameter tuning for $\alpha$ in the 
+  general-gamma model and $(p, c_0)$ in Efron's approach (see Tan et al. 
+  (*Stat. in Med.*, 2025) for further detail).
+  
 For a detailed methodological description, see Tan et al. 
 (*Stat. in Med.*, 2025).
 
@@ -128,8 +127,24 @@ fit <- pvEBayes(
   n_posterior_draws = 1000
 )
 
-# Print out a concise description of the fitted model
-fit
+# Expected output is given below. Note that the running time for model fitting 
+# and posterior draw generation may vary depending on the computing environment.
+
+# ✔ Fitting general-gamma model... [1.6s]
+# ✔ Generating 1000 posterior draws... [75ms]
+# Object of class 'pvEBayes'
+# 
+# General-gamma model with hyperparameter alpha = 0.3.
+# Estimated prior is a mixture of 18 gamma distributions.
+# 
+# Running time of the general-gamma model fitting: 1.6154 seconds.
+# Optimizer convergence: successful.
+# Running time for posterior draws 
+# (1000 signal strength posterior draws per AE-drug pair):0.0975 seconds.
+# 
+# Extract estimated prior parameters, discovered signals
+# and signal strength posterior draws using `summary()`.
+
 
 # Obtain a logical matrix for the detected signal
 summary(fit, return = "detected signal")
@@ -148,9 +163,10 @@ For a more detailed illustration, please see 'Vignette'.
 
 ## Code of Conduct
   
-Please note that the `pvEBayes` project is released with a 
-[Contributor Code of Conduct](https://yihaotancn.github.io/pvEBayes/CODE_OF_CONDUCT.html). 
-By contributing to this project, you agree to abide by its terms.
+Please note that this package is released with a [Contributor
+Code of Conduct](https://ropensci.org/code-of-conduct/). 
+By
+contributing to this project, you agree to abide by its terms.
 
 ## References
 
@@ -163,6 +179,10 @@ https://doi.org/10.1002/sim.70195.
 Tan Y, Markatou M and Chakraborty S. pvEBayes: An R Package for Empirical Bayes 
 Methods in Pharmacovigilance. *arXiv*:2512.01057 (stat.AP). 
 https://doi.org/10.48550/arXiv.2512.01057
+
+Tan Y, Markatou M, Chakraborty S. A Review of Statistical Methods for 
+Spontaneous Reporting System Data Mining: Signal Detection and Beyond. 
+*arXiv*:2604.18898 (stat.AP). https://doi.org/10.48550/arXiv.2604.18898
 
 Koenker R, Mizera I. Convex Optimization, Shape Constraints, Compound
 Decisions, and Empirical Bayes Rules. *Journal of the American

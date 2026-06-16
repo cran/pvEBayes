@@ -4,7 +4,7 @@
 \alias{posterior_draws}
 \title{Generate posterior draws for each AE-drug combination}
 \usage{
-posterior_draws(obj, n_posterior_draws = 1000)
+posterior_draws(obj, n_posterior_draws = 1000, verbose = TRUE)
 }
 \arguments{
 \item{obj}{a \code{pvEBayes} object, which is the output of the function
@@ -12,6 +12,9 @@ posterior_draws(obj, n_posterior_draws = 1000)
 
 \item{n_posterior_draws}{number of posterior draws for each AE-drug
 combination.}
+
+\item{verbose}{logical. If is TRUE (default), a progress bar is displayed to
+the console.}
 }
 \value{
 The function returns an S3 object of class \code{pvEBayes} with posterior draws.

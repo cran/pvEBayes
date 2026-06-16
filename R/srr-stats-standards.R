@@ -22,6 +22,14 @@
 #' @srrstatsNA {G4.0} There is not function that enables outputs to be written
 #' to local files.
 #' @srrstatsNA {G5.4c} This is not applicable.
+#' @srrstatsNA {G5.7} We have evaluated the algorithm’s performance in our
+#' published works. In particular, as the true signal strength increases, the
+#' scaled root mean squared error (scaled RMSE) decreases
+#' (see Figure 2C in Tan et al. (2025), Stat. in Med.). Relevant codes are
+#' provided in the package paper, which is currently available as an arXiv
+#' preprint (arXiv:2512.01057). However, incorporating these tests into the
+#' package testing routine would be time-consuming. Therefore, we mark this
+#' standard as `@srrstatsNA`.
 #' @srrstatsNA {G5.10, G5.11, G5.11a, G5.12}
 #' These tests are not applicable to \code{pvEBayes}. Therefore, are not
 #' included.
@@ -39,7 +47,7 @@
 #' @srrstatsNA {BS1.5}
 #' There is no multiple convergence criteria implemented for each optimizer.
 #'
-#' @srrstatsNA {BS2.2, BS2.3, BS2.4, BS2.5}
+#' @srrstatsNA {BS2.3, BS2.4, BS2.5}
 #' \pkg{pvEBayes} is based on parametric/nonparametric empirical Bayes methods
 #' in which the prior distributions are estimated from data, not specified by
 #' the user. Therefore, users do not provide prior distributional parameters in
@@ -65,7 +73,7 @@
 #' design matrices. As such, the notion of collinearity is not applicable in
 #' this context.
 #'
-#' @srrstatsNA {BS4.0, BS4.1, BS4.2, BS4.3, BS4.4, BS4.5, BS4.6, BS4.7}
+#' @srrstatsNA {BS4.0, BS4.1, BS4.2, BS4.6, BS4.7}
 #' The methods implemented in \pkg{pvEBayes} are parametric/nonparametric
 #' empirical Bayes approaches rely on optimizing the joint marginal likelihood
 #' with optimizers. These models do not rely on Monte Carlo sampling in full
@@ -76,6 +84,9 @@
 #' empirical Bayes approaches rely on optimizing the joint marginal likelihood
 #' with optimizers. Returning values with starting value(s) or seed(s) is not
 #' meaningful.
+#'
+#' @srrstatsNA {BS5.4} The package does not provide multiple convergence
+#' checkers that can be enabled.
 #'
 #' @srrstatsNA {BS6.2, BS6.5}
 #' The empirical Bayes methods implemented in \pkg{pvEBayes} do not rely on
